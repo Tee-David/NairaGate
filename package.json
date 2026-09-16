@@ -11,8 +11,15 @@
       "import": "./dist/index.js"
     }
   },
-  "bin": { "nairagate-mcp": "./dist/mcp.js" },
-  "files": ["dist", "README.md", "LICENSE", "skills/nairagate/SKILL.md"],
+  "bin": {
+    "nairagate-mcp": "./dist/mcp.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "skills/nairagate/SKILL.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
@@ -25,15 +32,33 @@
     "check": "npm run format && npm run lint && npm run typecheck && npm run test && npm run build && npm run audit:prod",
     "prepublishOnly": "npm run check"
   },
-  "keywords": ["nigeria", "bank", "verification", "paystack", "typescript", "fintech", "mcp", "agent-skill"],
+  "keywords": [
+    "nigeria",
+    "bank",
+    "verification",
+    "paystack",
+    "typescript",
+    "fintech",
+    "mcp",
+    "agent-skill"
+  ],
   "author": "Taiwo David Dayomola",
   "license": "Apache-2.0",
-  "repository": { "type": "git", "url": "git+https://github.com/Tee-David/NairaGate.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tee-David/NairaGate.git"
+  },
   "homepage": "https://github.com/Tee-David/NairaGate#readme",
-  "bugs": { "url": "https://github.com/Tee-David/NairaGate/issues" },
+  "bugs": {
+    "url": "https://github.com/Tee-David/NairaGate/issues"
+  },
   "sideEffects": false,
-  "publishConfig": { "access": "public" },
-  "engines": { "node": ">=20" },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.0.0",
     "zod": "^4.6.5"
