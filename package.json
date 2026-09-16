@@ -14,7 +14,12 @@
   "bin": {
     "nairagate-mcp": "./dist/mcp.js"
   },
-  "files": ["dist", "README.md", "LICENSE", "skills/nairagate/SKILL.md"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "skills/nairagate/SKILL.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
@@ -27,7 +32,16 @@
     "check": "npm run format && npm run lint && npm run typecheck && npm run test && npm run build && npm run audit:prod",
     "prepublishOnly": "npm run check"
   },
-  "keywords": ["nigeria", "bank", "verification", "paystack", "typescript", "fintech", "mcp", "agent-skill"],
+  "keywords": [
+    "nigeria",
+    "bank",
+    "verification",
+    "paystack",
+    "typescript",
+    "fintech",
+    "mcp",
+    "agent-skill"
+  ],
   "author": "Taiwo David Dayomola",
   "license": "Apache-2.0",
   "repository": {

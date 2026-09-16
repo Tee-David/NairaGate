@@ -25,7 +25,8 @@ function createServer(): McpServer {
     "list_banks",
     {
       title: "List Nigerian banks",
-      description: "List Nigerian banks available through the configured NairaGate provider.",
+      description:
+        "List Nigerian banks available through the configured NairaGate provider.",
       inputSchema: z.object({}),
       outputSchema: z.object({
         banks: z.array(z.object({ name: z.string(), code: z.string() })),
@@ -50,7 +51,8 @@ function createServer(): McpServer {
     "resolve_account",
     {
       title: "Resolve Nigerian bank account",
-      description: "Resolve an account holder name from a Nigerian account number and bank code.",
+      description:
+        "Resolve an account holder name from a Nigerian account number and bank code.",
       inputSchema: z.object({
         accountNumber: z.string().regex(/^\d{10}$/),
         bankCode: z.string().regex(/^\d{2,6}$/),
@@ -64,7 +66,10 @@ function createServer(): McpServer {
     },
     async ({ accountNumber, bankCode }) => {
       try {
-        const output = await nairaGate.accounts.resolve({ accountNumber, bankCode });
+        const output = await nairaGate.accounts.resolve({
+          accountNumber,
+          bankCode,
+        });
         return {
           content: [{ type: "text", text: JSON.stringify(output) }],
           structuredContent: output,
