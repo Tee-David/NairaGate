@@ -15,7 +15,9 @@ function mockFetch(response: Response): FetchLike {
 
 describe("PaystackProvider", () => {
   it("requires a non-empty secret key", () => {
-    expect(() => new PaystackProvider({ secretKey: "   " })).toThrowError(NairaGateError);
+    expect(() => new PaystackProvider({ secretKey: "   " })).toThrowError(
+      NairaGateError,
+    );
   });
 
   it("lists, de-duplicates, ignores malformed entries, and sorts banks", async () => {
@@ -31,7 +33,10 @@ describe("PaystackProvider", () => {
         ],
       }),
     );
-    const provider = new PaystackProvider({ secretKey: "sk_test_example", fetch: fetcher });
+    const provider = new PaystackProvider({
+      secretKey: "sk_test_example",
+      fetch: fetcher,
+    });
     await expect(provider.listBanks()).resolves.toEqual([
       { name: "Access Bank", code: "044" },
       { name: "Zenith Bank", code: "057" },
@@ -55,7 +60,10 @@ describe("PaystackProvider", () => {
           meta: { next: null },
         }),
       );
-    const provider = new PaystackProvider({ secretKey: "sk_test_example", fetch: fetcher });
+    const provider = new PaystackProvider({
+      secretKey: "sk_test_example",
+      fetch: fetcher,
+    });
     await expect(provider.listBanks()).resolves.toHaveLength(2);
     expect(fetcher).toHaveBeenCalledTimes(2);
     expect(fetcher.mock.calls[1]?.[0]).toContain("next=next-page");
@@ -82,7 +90,9 @@ describe("PaystackProvider", () => {
     });
     expect(fetcher).toHaveBeenCalledOnce();
     const [url, init] = vi.mocked(fetcher).mock.calls[0] ?? [];
-    expect(url).toBe("https://example.test/bank/resolve?account_number=0123456789&bank_code=058");
+    expect(url).toBe(
+      "https://example.test/bank/resolve?account_number=0123456789&bank_code=058",
+    );
     expect(init?.headers).toEqual({
       Authorization: "Bearer sk_test_example",
       Accept: "application/json",
@@ -91,7 +101,10 @@ describe("PaystackProvider", () => {
 
   it("rejects invalid input before a network request", async () => {
     const fetcher = vi.fn<FetchLike>();
-    const provider = new PaystackProvider({ secretKey: "sk_test_example", fetch: fetcher });
+    const provider = new PaystackProvider({
+      secretKey: "sk_test_example",
+      fetch: fetcher,
+    });
     await expect(
       provider.resolveAccount({ accountNumber: "123", bankCode: "058" }),
     ).rejects.toMatchObject({ code: "INVALID_INPUT" });
@@ -108,7 +121,10 @@ describe("PaystackProvider", () => {
     [500, "PROVIDER_ERROR"],
   ] as const)("maps bank-list HTTP %i to %s", async (status, code) => {
     const fetcher = mockFetch(jsonResponse({ status: false }, status));
-    const provider = new PaystackProvider({ secretKey: "sk_test_example", fetch: fetcher });
+    const provider = new PaystackProvider({
+      secretKey: "sk_test_example",
+      fetch: fetcher,
+    });
     await expect(provider.listBanks()).rejects.toMatchObject({
       code,
       status,
@@ -116,31 +132,61 @@ describe("PaystackProvider", () => {
     });
   });
 
-  it.each([400, 404, 422] as const)("maps account HTTP %i to ACCOUNT_NOT_FOUND", async (status) => {
-    const fetcher = mockFetch(
-      jsonResponse({ status: false, message: "sensitive upstream detail" }, status),
-    );
-    const provider = new PaystackProvider({ secretKey: "sk_test_example", fetch: fetcher });
-    await expect(
-      provider.resolveAccount({ accountNumber: "0123456789", bankCode: "058" }),
-    ).rejects.toMatchObject({ code: "ACCOUNT_NOT_FOUND", status, message: "Paystack request failed." });
-  });
+  it.each([400, 404, 422] as const)(
+    "maps account HTTP %i to ACCOUNT_NOT_FOUND",
+    async (status) => {
+      const fetcher = mockFetch(
+        jsonResponse(
+          { status: false, message: "sensitive upstream detail" },
+          status,
+        ),
+      );
+      const provider = new PaystackProvider({
+        secretKey: "sk_test_example",
+        fetch: fetcher,
+      });
+      await expect(
+        provider.resolveAccount({
+          accountNumber: "0123456789",
+          bankCode: "058",
+        }),
+      ).rejects.toMatchObject({
+        code: "ACCOUNT_NOT_FOUND",
+        status,
+        message: "Paystack request failed.",
+      });
+    },
+  );
 
   it("does not classify a bank-list 404 as an account lookup failure", async () => {
     const fetcher = mockFetch(jsonResponse({ status: false }, 404));
-    const provider = new PaystackProvider({ secretKey: "sk_test_example", fetch: fetcher });
-    await expect(provider.listBanks()).rejects.toMatchObject({ code: "PROVIDER_ERROR", status: 404 });
+    const provider = new PaystackProvider({
+      secretKey: "sk_test_example",
+      fetch: fetcher,
+    });
+    await expect(provider.listBanks()).rejects.toMatchObject({
+      code: "PROVIDER_ERROR",
+      status: 404,
+    });
   });
 
   it("rejects a successful envelope with malformed bank data", async () => {
     const fetcher = mockFetch(jsonResponse({ status: true, data: {} }));
-    const provider = new PaystackProvider({ secretKey: "sk_test_example", fetch: fetcher });
-    await expect(provider.listBanks()).rejects.toMatchObject({ code: "PROVIDER_ERROR" });
+    const provider = new PaystackProvider({
+      secretKey: "sk_test_example",
+      fetch: fetcher,
+    });
+    await expect(provider.listBanks()).rejects.toMatchObject({
+      code: "PROVIDER_ERROR",
+    });
   });
 
   it("normalizes malformed JSON responses", async () => {
     const fetcher = mockFetch(new Response("not-json", { status: 502 }));
-    const provider = new PaystackProvider({ secretKey: "sk_test_example", fetch: fetcher });
+    const provider = new PaystackProvider({
+      secretKey: "sk_test_example",
+      fetch: fetcher,
+    });
     await expect(provider.listBanks()).rejects.toMatchObject({
       code: "PROVIDER_ERROR",
       status: 502,
@@ -149,18 +195,31 @@ describe("PaystackProvider", () => {
 
   it("rejects malformed envelopes", async () => {
     const fetcher = mockFetch(jsonResponse({ data: [] }));
-    const provider = new PaystackProvider({ secretKey: "sk_test_example", fetch: fetcher });
-    await expect(provider.listBanks()).rejects.toMatchObject({ code: "PROVIDER_ERROR" });
+    const provider = new PaystackProvider({
+      secretKey: "sk_test_example",
+      fetch: fetcher,
+    });
+    await expect(provider.listBanks()).rejects.toMatchObject({
+      code: "PROVIDER_ERROR",
+    });
   });
 
   it("normalizes network failures without leaking the secret", async () => {
-    const fetcher = vi.fn<FetchLike>(() => Promise.reject(new Error("socket unavailable")));
-    const provider = new PaystackProvider({ secretKey: "sk_test_example", fetch: fetcher });
+    const fetcher = vi.fn<FetchLike>(() =>
+      Promise.reject(new Error("socket unavailable")),
+    );
+    const provider = new PaystackProvider({
+      secretKey: "sk_test_example",
+      fetch: fetcher,
+    });
     try {
       await provider.listBanks();
       throw new Error("expected rejection");
     } catch (error) {
-      expect(error).toMatchObject({ code: "NETWORK_ERROR", provider: "paystack" });
+      expect(error).toMatchObject({
+        code: "NETWORK_ERROR",
+        provider: "paystack",
+      });
       expect(String(error)).not.toContain("sk_test_example");
     }
   });
@@ -172,7 +231,10 @@ describe("PaystackProvider", () => {
         data: { account_number: "0123456789" },
       }),
     );
-    const provider = new PaystackProvider({ secretKey: "sk_test_example", fetch: fetcher });
+    const provider = new PaystackProvider({
+      secretKey: "sk_test_example",
+      fetch: fetcher,
+    });
     await expect(
       provider.resolveAccount({ accountNumber: "0123456789", bankCode: "058" }),
     ).rejects.toMatchObject({ code: "PROVIDER_ERROR" });

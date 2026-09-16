@@ -24,17 +24,26 @@ const server = createServer(async (request, response) => {
   const bankCode = url.searchParams.get("bankCode");
   if (!accountNumber || !bankCode) {
     response.writeHead(400, { "content-type": "application/json" });
-    response.end(JSON.stringify({ error: "accountNumber and bankCode are required" }));
+    response.end(
+      JSON.stringify({ error: "accountNumber and bankCode are required" }),
+    );
     return;
   }
 
   try {
-    const account = await nairaGate.accounts.resolve({ accountNumber, bankCode });
+    const account = await nairaGate.accounts.resolve({
+      accountNumber,
+      bankCode,
+    });
     response.writeHead(200, { "content-type": "application/json" });
     response.end(JSON.stringify(account));
   } catch (error) {
-    const status = error instanceof NairaGateError && error.code === "INVALID_INPUT" ? 400 : 502;
-    const code = error instanceof NairaGateError ? error.code : "INTERNAL_ERROR";
+    const status =
+      error instanceof NairaGateError && error.code === "INVALID_INPUT"
+        ? 400
+        : 502;
+    const code =
+      error instanceof NairaGateError ? error.code : "INTERNAL_ERROR";
     response.writeHead(status, { "content-type": "application/json" });
     response.end(JSON.stringify({ error: code }));
   }

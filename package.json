@@ -11,7 +11,11 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
@@ -23,7 +27,14 @@
     "check": "npm run format && npm run lint && npm run typecheck && npm run test && npm run build",
     "prepublishOnly": "npm run check"
   },
-  "keywords": ["nigeria", "bank", "verification", "paystack", "typescript", "fintech"],
+  "keywords": [
+    "nigeria",
+    "bank",
+    "verification",
+    "paystack",
+    "typescript",
+    "fintech"
+  ],
   "author": "Taiwo David Dayomola",
   "license": "Apache-2.0",
   "repository": {
@@ -38,7 +49,9 @@
   "publishConfig": {
     "access": "public"
   },
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
     "@types/node": "^22.0.0",
