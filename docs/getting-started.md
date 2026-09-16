@@ -20,9 +20,10 @@ Store your Paystack secret key in the server environment. Do not prefix it with 
 ```ts
 import { createNairaGate, PaystackProvider } from "nairagate";
 
-const provider = new PaystackProvider({
-  secretKey: process.env.PAYSTACK_SECRET_KEY!,
-});
+const secretKey = process.env.PAYSTACK_SECRET_KEY;
+if (!secretKey) throw new Error("PAYSTACK_SECRET_KEY is required.");
+
+const provider = new PaystackProvider({ secretKey });
 
 export const nairaGate = createNairaGate({ provider });
 ```
