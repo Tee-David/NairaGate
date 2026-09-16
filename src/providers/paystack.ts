@@ -3,10 +3,12 @@ import type { Bank, BankProvider, FetchLike, ResolveAccountInput, ResolvedAccoun
 import { validateResolveAccountInput } from "../validation.js";
 
 const DEFAULT_BASE_URL = "https://api.paystack.co";
+const BANK_PAGE_SIZE = 100;
 
 type PaystackEnvelope = {
   status: boolean;
   data?: unknown;
+  meta?: unknown;
 };
 
 export type PaystackProviderOptions = {
@@ -22,7 +24,16 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function parseEnvelope(value: unknown): PaystackEnvelope | null {
   if (!isRecord(value) || typeof value.status !== "boolean") return null;
-  return { status: value.status, ...(Object.hasOwn(value, "data") ? { data: value.data } : {}) };
+  return {
+    status: value.status,
+    ...(Object.hasOwn(value, "data") ? { data: value.data } : {}),
+    ...(Object.hasOwn(value, "meta") ? { meta: value.meta } : {}),
+  };
+}
+
+function parseNextCursor(meta: unknown): string | null {
+  if (!isRecord(meta)) return null;
+  return typeof meta.next === "string" && meta.next.length > 0 ? meta.next : null;
 }
 
 function parseBank(value: unknown): Bank | null {
@@ -60,18 +71,31 @@ export class PaystackProvider implements BankProvider {
   }
 
   async listBanks(): Promise<Bank[]> {
-    const payload = await this.request("/bank?country=nigeria&perPage=200", "banks");
-    if (!Array.isArray(payload.data)) {
-      throw new NairaGateError("PROVIDER_ERROR", "Paystack returned an invalid bank response.", {
-        provider: this.name,
-      });
-    }
-
     const unique = new Map<string, Bank>();
-    for (const value of payload.data) {
-      const bank = parseBank(value);
-      if (bank && !unique.has(bank.code)) unique.set(bank.code, bank);
-    }
+    let next: string | null = null;
+
+    do {
+      const params = new URLSearchParams({
+        country: "nigeria",
+        use_cursor: "true",
+        perPage: String(BANK_PAGE_SIZE),
+      });
+      if (next) params.set("next", next);
+
+      const payload = await this.request(`/bank?${params.toString()}`, "banks");
+      if (!Array.isArray(payload.data)) {
+        throw new NairaGateError("PROVIDER_ERROR", "Paystack returned an invalid bank response.", {
+          provider: this.name,
+        });
+      }
+
+      for (const value of payload.data) {
+        const bank = parseBank(value);
+        if (bank && !unique.has(bank.code)) unique.set(bank.code, bank);
+      }
+      next = parseNextCursor(payload.meta);
+    } while (next);
+
     return [...unique.values()].sort((a, b) => a.name.localeCompare(b.name));
   }
 
