@@ -26,10 +26,10 @@ jobs:
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-          package-manager-cache: false
+          cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Verify release tag matches package version
         shell: bash
@@ -46,5 +46,5 @@ jobs:
       - name: Inspect package contents
         run: npm pack --dry-run
 
-      - name: Publish
-        run: npm publish
+      - name: Publish with provenance
+        run: npm publish --access public --provenance
