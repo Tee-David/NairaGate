@@ -10,20 +10,18 @@ permissions:
 
 jobs:
   quality:
+    strategy:
+      matrix:
+        node-version: [20, 22, 24]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version: ${{ matrix.node-version }}
+          package-manager-cache: false
       - name: Install dependencies
         run: npm install
-      - name: Diagnostic quality gate
-        run: |
-          npm run format:fix
-          git diff --no-ext-diff
-          npm run lint
-          npm run typecheck
-          npm run test
-          npm run build
+      - name: Quality gate
+        run: npm run check
