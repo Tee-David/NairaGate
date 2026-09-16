@@ -59,9 +59,7 @@ describe("PaystackProvider", () => {
     });
     expect(fetcher).toHaveBeenCalledOnce();
     const [url, init] = vi.mocked(fetcher).mock.calls[0] ?? [];
-    expect(String(url)).toBe(
-      "https://example.test/bank/resolve?account_number=0123456789&bank_code=058",
-    );
+    expect(url).toBe("https://example.test/bank/resolve?account_number=0123456789&bank_code=058");
     expect(init?.headers).toEqual({
       Authorization: "Bearer sk_test_example",
       Accept: "application/json",
