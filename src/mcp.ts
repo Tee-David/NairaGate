@@ -3,8 +3,8 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { serveStdio } from "@modelcontextprotocol/server/stdio";
 import { z } from "zod";
+import { createNairaGate } from "./client.js";
 import { NairaGateError } from "./errors.js";
-import { createNairaGate } from "./nairagate.js";
 import { PaystackProvider } from "./providers/paystack.js";
 
 function createServer(): McpServer {
