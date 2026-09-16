@@ -9,10 +9,14 @@ export default tseslint.config(
     languageOptions: {
       parserOptions: {
         projectService: {
-          allowDefaultProject: ["eslint.config.js", "examples/nextjs/app/api/banks/resolve/route.ts"],
+          allowDefaultProject: ["eslint.config.js"],
         },
         tsconfigRootDir: import.meta.dirname,
       },
     },
+  },
+  {
+    files: ["examples/**/*.ts"],
+    extends: [tseslint.configs.disableTypeChecked],
   },
 );
