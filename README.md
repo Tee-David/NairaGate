@@ -4,19 +4,36 @@ A secure, provider-oriented TypeScript toolkit for Nigerian bank discovery and a
 
 **Created and maintained by Taiwo David Dayomola, Senior Software Engineer.**
 
-> NairaGate is under active development. Paystack is the first implemented provider. Flutterwave support is on the roadmap.
+> NairaGate is under active development. Paystack is the first implemented provider. Flutterwave and other native provider support is on the roadmap.
 
 ## The problem
 
-Building Nigerian fintech, payments, onboarding, payout, marketplace, or financial-testing flows often requires a deceptively simple capability: given a bank and account number, resolve the account holder's name before continuing.
+NairaGate started with a problem I ran into while building a Nigerian fintech product. I needed reliable bank account-name verification, but getting from a simple product requirement to a dependable implementation meant dealing with access and onboarding constraints, provider-specific authentication, different response shapes, inconsistent failure handling, and security decisions that had little to do with the feature I was actually trying to ship.
 
-Direct financial-infrastructure integrations are not always appropriate for an early product, prototype, internal tool, test environment, or developer who is not yet ready to complete an institution-level integration process. Direct NIBSS connectivity, for example, is governed by technical, security, operational, certification, and formal approval requirements before live transaction access.
+I built the integration I needed on the spot. Once it worked, the architectural problem became obvious: that solution should not stay buried inside one application, and the next Nigerian developer should not have to rebuild the same provider plumbing from scratch.
 
-At the same time, every application should not need to reinvent provider authentication, bank-list normalization, request validation, error translation, timeouts, account-resolution calls, and the security considerations around exposing those operations to users.
+Building Nigerian fintech, payments, onboarding, payout, marketplace, or financial-testing flows often requires the same deceptively simple capability: given a bank and account number, resolve the account holder's name before continuing. Direct financial-infrastructure integrations are not always appropriate for an early product, prototype, internal tool, test environment, or developer who is not yet ready to complete an institution-level integration process. Direct NIBSS connectivity, for example, is governed by technical, security, operational, certification, and formal approval requirements before live transaction access.
 
-**NairaGate exists to make that developer workflow smaller and safer.**
+At the provider layer, applications still have to deal with authentication, bank-list normalization, validation, timeouts, upstream payloads, error translation, and the security implications of exposing account-resolution operations. Those details become application coupling when every product implements them independently.
 
-It provides one typed application-facing interface over supported account-resolution providers, beginning with Paystack. It is not a replacement for NIBSS, a bank, regulatory compliance, KYC obligations, or a payment processor. It is an open-source developer abstraction for applications that need bank discovery and account-name resolution through providers they are authorized to use.
+**NairaGate turns that repeated integration work into a small, typed, security-conscious abstraction.**
+
+The application asks NairaGate to resolve a Nigerian bank account. NairaGate delegates the provider-specific work to an adapter, beginning with Paystack:
+
+```text
+Your application
+      |
+      v
+  NairaGate
+      |
+      v
+Provider abstraction
+      |
+      +--> Paystack
+      +--> Flutterwave and other native providers (roadmap)
+```
+
+NairaGate is not a replacement for NIBSS, a bank, regulatory compliance, KYC obligations, or a payment processor. It does not bypass institutional requirements or provider authorization. It reduces application-level integration friction for developers using providers they are authorized to access.
 
 ## Why use it?
 
@@ -33,7 +50,7 @@ It provides one typed application-facing interface over supported account-resolu
 | --- | --- | --- | --- |
 | Paystack | Yes | Yes | Implemented |
 | Flutterwave | Planned | Planned | Roadmap |
-| Additional providers | Planned | Planned | Community and maintainer roadmap |
+| Other native providers | Planned | Planned | Roadmap |
 
 A provider appearing on the roadmap does not mean it is currently supported. New integrations are only marked implemented after the adapter, error mapping, documentation, and automated tests are complete.
 
@@ -51,10 +68,11 @@ The intended package API is already implemented:
 ```ts
 import { createNairaGate, PaystackProvider } from "nairagate";
 
+const secretKey = process.env.PAYSTACK_SECRET_KEY;
+if (!secretKey) throw new Error("PAYSTACK_SECRET_KEY is required.");
+
 const nairaGate = createNairaGate({
-  provider: new PaystackProvider({
-    secretKey: process.env.PAYSTACK_SECRET_KEY!,
-  }),
+  provider: new PaystackProvider({ secretKey }),
 });
 
 const banks = await nairaGate.banks.list();
