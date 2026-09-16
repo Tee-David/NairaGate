@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/nairagate-social-preview.png" alt="NairaGate — Nigerian banks, simplified" width="100%" />
+</p>
+
 # NairaGate
 
 [![CI](https://github.com/Tee-David/NairaGate/actions/workflows/ci.yml/badge.svg)](https://github.com/Tee-David/NairaGate/actions/workflows/ci.yml)
