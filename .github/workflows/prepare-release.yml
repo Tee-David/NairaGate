@@ -13,7 +13,7 @@ permissions:
 jobs:
   prepare:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 11
     steps:
       - uses: actions/checkout@v7
         with:
