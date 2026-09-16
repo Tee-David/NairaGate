@@ -1,8 +1,17 @@
 # Changelog
 
-All notable changes to NairaGate will be documented here. The project follows Semantic Versioning once stable releases begin.
+All notable changes to NairaGate are documented here. The project follows Semantic Versioning.
 
 ## [Unreleased]
+
+### Planned
+
+- Flutterwave and additional native provider adapters
+- Continued SDK, MCP and Agent Skill hardening
+
+## [0.1.0] - 2026-09-16
+
+Initial public release.
 
 ### Added
 
@@ -11,10 +20,9 @@ All notable changes to NairaGate will be documented here. The project follows Se
 - Strict account and bank-code validation
 - Typed domain and provider errors
 - Configurable network timeout and injectable fetch boundary
-- Unit tests for core Paystack behavior
-- Security and contributor documentation
-- CI and dependency automation
-
-## [0.1.0] - Unreleased
-
-Initial public-development milestone. This version is not yet published to npm.
+- Deterministic tests for core Paystack behavior
+- `nairagate-mcp` stdio MCP server with `list_banks` and `resolve_account` tools
+- NairaGate Agent Skill under `skills/nairagate/SKILL.md`
+- Security, architecture and contributor documentation
+- CI, CodeQL, dependency automation and npm release workflow
+- npm package distribution for `nairagate`
