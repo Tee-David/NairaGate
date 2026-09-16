@@ -1,9 +1,13 @@
 import { NairaGateError, PaystackProvider, createNairaGate } from "nairagate";
 
+const secretKey = process.env.PAYSTACK_SECRET_KEY;
+
+if (!secretKey) {
+  throw new Error("PAYSTACK_SECRET_KEY is required.");
+}
+
 const nairaGate = createNairaGate({
-  provider: new PaystackProvider({
-    secretKey: process.env.PAYSTACK_SECRET_KEY!,
-  }),
+  provider: new PaystackProvider({ secretKey }),
 });
 
 export async function POST(request: Request) {
