@@ -7,7 +7,12 @@ export default tseslint.config(
   ...tseslint.configs.recommendedTypeChecked,
   {
     languageOptions: {
-      parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
+      parserOptions: {
+        projectService: {
+          allowDefaultProject: ["eslint.config.js", "examples/nextjs/app/api/banks/resolve/route.ts"],
+        },
+        tsconfigRootDir: import.meta.dirname,
+      },
     },
   },
 );
