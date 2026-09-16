@@ -5,76 +5,27 @@
 # NairaGate
 
 [![CI](https://github.com/Tee-David/NairaGate/actions/workflows/ci.yml/badge.svg)](https://github.com/Tee-David/NairaGate/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/nairagate.svg)](https://www.npmjs.com/package/nairagate)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](package.json)
 
-A secure, provider-oriented TypeScript toolkit for Nigerian bank discovery and account verification.
+Nigerian bank infrastructure for developers and AI agents. Discover Nigerian banks and resolve account names through a secure, typed, provider-neutral interface.
+
+Use NairaGate as a TypeScript SDK, an Agent Skill, or an MCP server for compatible AI applications.
 
 **Created and maintained by Taiwo David Dayomola, Senior Software Engineer.**
 
 > **Status:** Pre-1.0 and under active development. Paystack is the first implemented provider. Flutterwave and other native provider support is on the roadmap. See [ROADMAP.md](ROADMAP.md).
 
-## The problem
-
-NairaGate started with a problem I ran into while building a Nigerian fintech product. I needed reliable bank account-name verification, but getting from a simple product requirement to a dependable implementation meant dealing with access and onboarding constraints, provider-specific authentication, different response shapes, inconsistent failure handling, and security decisions that had little to do with the feature I was actually trying to ship.
-
-I built the integration I needed on the spot. Once it worked, the architectural problem became obvious: that solution should not stay buried inside one application, and the next Nigerian developer should not have to rebuild the same provider plumbing from scratch.
-
-Building Nigerian fintech, payments, onboarding, payout, marketplace, or financial-testing flows often requires the same deceptively simple capability: given a bank and account number, resolve the account holder's name before continuing. Direct financial-infrastructure integrations are not always appropriate for an early product, prototype, internal tool, test environment, or developer who is not yet ready to complete an institution-level integration process.
-
-At the provider layer, applications still have to deal with authentication, bank-list normalization, validation, timeouts, upstream payloads, error translation, and the security implications of exposing account-resolution operations. Those details become application coupling when every product implements them independently.
-
-**NairaGate turns that repeated integration work into a small, typed, security-conscious abstraction.**
-
-## Architecture
-
-```text
-Your application
-      |
-      v
-  NairaGate
-      |
-      v
-Provider contract
-      |
-      +--> Paystack (implemented)
-      +--> Flutterwave (roadmap)
-      +--> Other native providers (roadmap)
-```
-
-Your application depends on NairaGate's stable domain contract. Provider adapters own provider-specific authentication, endpoints, payloads, response normalization and failure mapping.
-
-NairaGate is not a replacement for NIBSS, a bank, regulatory compliance, KYC obligations, or a payment processor. It does not bypass institutional requirements or provider authorization. It reduces application-level integration friction for developers using providers they are authorized to access.
-
-## Why use it?
-
-- Build and test Nigerian account-verification flows without coupling your application directly to one provider's response format.
-- Keep provider credentials and financial API calls in trusted server-side code.
-- Validate account inputs before making upstream requests.
-- Receive predictable typed errors instead of scattering provider-specific failure handling across your application.
-- Swap or add providers behind a common contract as NairaGate grows.
-- Mock the network boundary for deterministic tests without calling live banking APIs.
-
-## Provider status
-
-| Provider               | Bank discovery | Account resolution | Status      |
-| ---------------------- | -------------- | ------------------ | ----------- |
-| Paystack               | Yes            | Yes                | Implemented |
-| Flutterwave            | Planned        | Planned            | Roadmap     |
-| Other native providers | Planned        | Planned            | Roadmap     |
-
-A provider appearing on the roadmap does not mean it is currently supported. New integrations are only marked implemented after the adapter, error mapping, documentation and automated tests are complete.
-
-## Quick start
-
-NairaGate is currently pre-release and is not yet published to npm. To work with the repository:
+## Install
 
 ```bash
-npm install
-npm run check
+npm install nairagate
 ```
 
-The intended package API is implemented:
+Requires Node.js 20 or newer.
+
+## TypeScript SDK
 
 ```ts
 import { createNairaGate, PaystackProvider } from "nairagate";
@@ -87,49 +38,128 @@ const nairaGate = createNairaGate({
 });
 
 const banks = await nairaGate.banks.list();
-
 const account = await nairaGate.accounts.resolve({
   accountNumber: "0123456789",
   bankCode: "058",
 });
 ```
 
-Never put a provider secret key in browser or mobile client code.
+Keep provider credentials server-side. Never place a Paystack secret key in browser code, mobile code, prompts, logs, or committed files.
 
-## Design principles
+## MCP server
 
-NairaGate is deliberately small at the public API and strict at its boundaries. The core depends on a provider contract rather than Paystack-specific types. Provider adapters own authentication, URLs, upstream payloads, response normalization and provider-specific failures. Network access is injectable so tests remain deterministic.
+The npm package includes the `nairagate-mcp` stdio MCP server. It exposes the same NairaGate core to compatible AI clients without giving the model direct access to provider credentials.
 
-The project favors explicit failures over silent fallback behavior. A missing secret, malformed input, network failure, invalid provider response, rate limit, or authentication failure should be visible to the application as a typed error rather than disguised as a successful empty result.
-
-Read [Architecture](docs/architecture.md) for the design in detail and [API reference](docs/api-reference.md) for the public contract.
-
-## Testing
-
-The test suite is deterministic and never calls live banking APIs. Provider behavior is exercised through an injectable network boundary, with coverage focused on validation, successful normalization, authentication failures, rate limits, unavailable accounts, malformed provider responses, network failures and preventing secrets from leaking through public errors.
-
-Run the complete quality gate with:
+Set the provider credential in the environment of the process running the MCP server:
 
 ```bash
-npm run check
+PAYSTACK_SECRET_KEY=your_secret_key npx -y nairagate nairagate-mcp
 ```
 
-That runs formatting verification, linting, TypeScript type checking, tests and the package build.
+When configuring an MCP client, use `npx` as the command, pass `-y`, `nairagate`, and `nairagate-mcp` as arguments, and provide `PAYSTACK_SECRET_KEY` through that client's secure environment configuration. Do not put the key in prompts or repository files.
+
+### MCP tools
+
+| Tool | Purpose | Input |
+| --- | --- | --- |
+| `list_banks` | List Nigerian banks available through the configured provider | None |
+| `resolve_account` | Resolve an account holder name | `accountNumber`, `bankCode` |
+
+Both tools are read-only from the MCP client's perspective. Account numbers and resolved names should still be treated as privacy-sensitive financial data.
+
+## Agent Skill
+
+The repository ships an Agent Skill at [`skills/nairagate/SKILL.md`](skills/nairagate/SKILL.md). It teaches compatible coding agents how to integrate and review NairaGate safely, including credential handling, input validation, provider boundaries, privacy-sensitive logging, MCP usage, and the distinction between implemented and roadmap providers.
+
+Install it from the repository with a compatible Agent Skills installer:
+
+```bash
+npx skills add https://github.com/Tee-David/NairaGate --skill nairagate
+```
+
+The skill contains integration guidance, not credentials. Actual bank operations still run through trusted server-side NairaGate code or the MCP server.
+
+## The problem
+
+NairaGate started with a problem I ran into while building a Nigerian fintech product. I needed reliable bank account-name verification, but getting from a simple product requirement to a dependable implementation meant dealing with access and onboarding constraints, provider-specific authentication, different response shapes, inconsistent failure handling, and security decisions that had little to do with the feature I was actually trying to ship.
+
+I built the integration I needed on the spot. Once it worked, the architectural problem became obvious: that solution should not stay buried inside one application, and the next Nigerian developer should not have to rebuild the same provider plumbing from scratch.
+
+Building Nigerian fintech, payments, onboarding, payout, marketplace, or financial-testing flows often requires the same deceptively simple capability: given a bank and account number, resolve the account holder's name before continuing. Direct financial-infrastructure integrations are not always appropriate for an early product, prototype, internal tool, test environment, or developer who is not yet ready to complete an institution-level integration process.
+
+**NairaGate turns that repeated integration work into a small, typed, security-conscious abstraction.**
+
+## Architecture
+
+```text
+                    +-- TypeScript / npm SDK
+                    |
+Application/Agent --+-- NairaGate Agent Skill
+                    |
+                    +-- MCP / Agent Tools
+                              |
+                         NairaGate Core
+                              |
+                      Provider Interface
+                       |             |
+                   Paystack     Flutterwave
+                    today        roadmap
+```
+
+Your application depends on NairaGate's stable domain contract. Provider adapters own provider-specific authentication, endpoints, payloads, response normalization and failure mapping. The SDK, Skill and MCP interface all converge on the same core rather than creating separate banking implementations.
+
+NairaGate is not a replacement for NIBSS, a bank, regulatory compliance, KYC obligations, or a payment processor. It does not bypass institutional requirements or provider authorization. It reduces application-level integration friction for developers using providers they are authorized to access.
+
+## Why use it?
+
+- Build and test Nigerian account-verification flows without coupling your application directly to one provider's response format.
+- Keep provider credentials and financial API calls in trusted server-side code.
+- Validate account inputs before making upstream requests.
+- Receive predictable typed errors instead of scattering provider-specific failure handling across your application.
+- Use the same core from application code or compatible AI tooling.
+- Swap or add providers behind a common contract as NairaGate grows.
+- Mock the network boundary for deterministic tests without calling live banking APIs.
+
+## Provider status
+
+| Provider | Bank discovery | Account resolution | Status |
+| --- | --- | --- | --- |
+| Paystack | Yes | Yes | Implemented |
+| Flutterwave | Planned | Planned | Roadmap |
+| Other native providers | Planned | Planned | Roadmap |
+
+A provider appearing on the roadmap does not mean it is currently supported. New integrations are only marked implemented after the adapter, error mapping, documentation and automated tests are complete.
+
+## Development commands
+
+```bash
+npm ci              # reproducible dependency install
+npm run check       # complete quality gate
+npm run test        # deterministic test suite
+npm run typecheck   # TypeScript validation
+npm run lint        # ESLint
+npm run format      # Prettier verification
+npm run build       # compile distributable files
+npm pack --dry-run  # inspect npm package contents
+```
+
+The complete quality gate checks formatting, linting, TypeScript, tests, the package build and production dependency audit.
 
 ## Security is part of the API
 
 Account-name resolution can expose personal information and can become an enumeration surface if an application publishes it without controls. NairaGate validates inputs and normalizes provider failures, but it cannot know your application's users, authorization model, or distributed infrastructure.
 
-Before exposing resolution over HTTP, implement the appropriate authentication or authorization boundary, per-user and per-IP rate limiting, abuse monitoring, conservative retries, and privacy-aware logging. Do not log complete account numbers and resolved names unless your application has a justified need and an appropriate retention policy.
+Before exposing resolution over HTTP or through an agent-facing service, implement the appropriate authentication or authorization boundary, per-user and per-IP rate limiting, abuse monitoring, conservative retries, and privacy-aware logging. Do not log complete account numbers and resolved names unless your application has a justified need and an appropriate retention policy.
 
 Read [SECURITY.md](SECURITY.md) and the [security guide](docs/security.md) before production use.
 
-## Examples and documentation
+## Documentation and examples
 
 - [Getting started](docs/getting-started.md)
 - [API reference](docs/api-reference.md)
 - [Architecture](docs/architecture.md)
 - [Security guide](docs/security.md)
+- [Agent Skill](skills/nairagate/SKILL.md)
 - [Roadmap](ROADMAP.md)
 - [Contributing](CONTRIBUTING.md)
 - [Changelog](CHANGELOG.md)
