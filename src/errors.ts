@@ -8,16 +8,16 @@ export type NairaGateErrorCode =
 
 export class NairaGateError extends Error {
   readonly code: NairaGateErrorCode;
-  readonly provider?: string;
-  readonly status?: number;
-  readonly cause?: unknown;
+  readonly provider: string | undefined;
+  readonly status: number | undefined;
+  override readonly cause: unknown;
 
   constructor(
     code: NairaGateErrorCode,
     message: string,
     options: { provider?: string; status?: number; cause?: unknown } = {},
   ) {
-    super(message);
+    super(message, { cause: options.cause });
     this.name = "NairaGateError";
     this.code = code;
     this.provider = options.provider;
