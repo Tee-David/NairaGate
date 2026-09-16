@@ -20,7 +20,8 @@
     "lint": "eslint .",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
-    "check": "npm run format && npm run lint && npm run typecheck && npm run test && npm run build"
+    "check": "npm run format && npm run lint && npm run typecheck && npm run test && npm run build",
+    "check:diagnostic": "npm run format:fix && npm run lint && npm run typecheck && npm run test && npm run build"
   },
   "keywords": ["nigeria", "bank", "verification", "paystack", "typescript", "fintech"],
   "license": "Apache-2.0",
