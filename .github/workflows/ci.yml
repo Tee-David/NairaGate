@@ -20,4 +20,4 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Quality gate
-        run: npm run check
+        run: npm run check:diagnostic
