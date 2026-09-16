@@ -1,5 +1,11 @@
 import { NairaGateError } from "../errors.js";
-import type { Bank, BankProvider, FetchLike, ResolveAccountInput, ResolvedAccount } from "../types.js";
+import type {
+  Bank,
+  BankProvider,
+  FetchLike,
+  ResolveAccountInput,
+  ResolvedAccount,
+} from "../types.js";
 import { validateResolveAccountInput } from "../validation.js";
 
 const DEFAULT_BASE_URL = "https://api.paystack.co";
@@ -33,20 +39,33 @@ function parseEnvelope(value: unknown): PaystackEnvelope | null {
 
 function parseNextCursor(meta: unknown): string | null {
   if (!isRecord(meta)) return null;
-  return typeof meta.next === "string" && meta.next.length > 0 ? meta.next : null;
+  return typeof meta.next === "string" && meta.next.length > 0
+    ? meta.next
+    : null;
 }
 
 function parseBank(value: unknown): Bank | null {
-  if (!isRecord(value) || typeof value.name !== "string" || typeof value.code !== "string") return null;
+  if (
+    !isRecord(value) ||
+    typeof value.name !== "string" ||
+    typeof value.code !== "string"
+  )
+    return null;
   const name = value.name.trim();
   const code = value.code.trim();
   if (!name || !code) return null;
   return { name, code };
 }
 
-function parseResolvedAccount(value: unknown): { accountNumber: string; accountName: string } | null {
+function parseResolvedAccount(
+  value: unknown,
+): { accountNumber: string; accountName: string } | null {
   if (!isRecord(value)) return null;
-  if (typeof value.account_number !== "string" || typeof value.account_name !== "string") return null;
+  if (
+    typeof value.account_number !== "string" ||
+    typeof value.account_name !== "string"
+  )
+    return null;
   const accountNumber = value.account_number.trim();
   const accountName = value.account_name.trim();
   if (!accountNumber || !accountName) return null;
@@ -62,7 +81,11 @@ export class PaystackProvider implements BankProvider {
 
   constructor(options: PaystackProviderOptions) {
     if (!options.secretKey?.trim()) {
-      throw new NairaGateError("INVALID_INPUT", "A Paystack secret key is required.", { provider: this.name });
+      throw new NairaGateError(
+        "INVALID_INPUT",
+        "A Paystack secret key is required.",
+        { provider: this.name },
+      );
     }
     this.secretKey = options.secretKey.trim();
     this.fetcher = options.fetch ?? globalThis.fetch;
@@ -84,9 +107,13 @@ export class PaystackProvider implements BankProvider {
 
       const payload = await this.request(`/bank?${params.toString()}`, "banks");
       if (!Array.isArray(payload.data)) {
-        throw new NairaGateError("PROVIDER_ERROR", "Paystack returned an invalid bank response.", {
-          provider: this.name,
-        });
+        throw new NairaGateError(
+          "PROVIDER_ERROR",
+          "Paystack returned an invalid bank response.",
+          {
+            provider: this.name,
+          },
+        );
       }
 
       for (const value of payload.data) {
@@ -99,18 +126,27 @@ export class PaystackProvider implements BankProvider {
     return [...unique.values()].sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  async resolveAccount(rawInput: ResolveAccountInput): Promise<ResolvedAccount> {
+  async resolveAccount(
+    rawInput: ResolveAccountInput,
+  ): Promise<ResolvedAccount> {
     const input = validateResolveAccountInput(rawInput);
     const params = new URLSearchParams({
       account_number: input.accountNumber,
       bank_code: input.bankCode,
     });
-    const payload = await this.request(`/bank/resolve?${params.toString()}`, "account");
+    const payload = await this.request(
+      `/bank/resolve?${params.toString()}`,
+      "account",
+    );
     const account = parseResolvedAccount(payload.data);
     if (!account) {
-      throw new NairaGateError("PROVIDER_ERROR", "Paystack returned an incomplete account response.", {
-        provider: this.name,
-      });
+      throw new NairaGateError(
+        "PROVIDER_ERROR",
+        "Paystack returned an incomplete account response.",
+        {
+          provider: this.name,
+        },
+      );
     }
     return {
       accountNumber: account.accountNumber,
@@ -119,34 +155,51 @@ export class PaystackProvider implements BankProvider {
     };
   }
 
-  private async request(path: string, operation: "banks" | "account"): Promise<PaystackEnvelope> {
+  private async request(
+    path: string,
+    operation: "banks" | "account",
+  ): Promise<PaystackEnvelope> {
     let response: Response;
     try {
       response = await this.fetcher(`${this.baseUrl}${path}`, {
-        headers: { Authorization: `Bearer ${this.secretKey}`, Accept: "application/json" },
+        headers: {
+          Authorization: `Bearer ${this.secretKey}`,
+          Accept: "application/json",
+        },
         signal: AbortSignal.timeout(this.timeoutMs),
       });
     } catch (cause) {
-      throw new NairaGateError("NETWORK_ERROR", "Could not reach Paystack.", { provider: this.name, cause });
+      throw new NairaGateError("NETWORK_ERROR", "Could not reach Paystack.", {
+        provider: this.name,
+        cause,
+      });
     }
 
     let rawPayload: unknown;
     try {
       rawPayload = await response.json();
     } catch (cause) {
-      throw new NairaGateError("PROVIDER_ERROR", "Paystack returned an invalid response.", {
-        provider: this.name,
-        status: response.status,
-        cause,
-      });
+      throw new NairaGateError(
+        "PROVIDER_ERROR",
+        "Paystack returned an invalid response.",
+        {
+          provider: this.name,
+          status: response.status,
+          cause,
+        },
+      );
     }
 
     const payload = parseEnvelope(rawPayload);
     if (!payload) {
-      throw new NairaGateError("PROVIDER_ERROR", "Paystack returned an invalid response.", {
-        provider: this.name,
-        status: response.status,
-      });
+      throw new NairaGateError(
+        "PROVIDER_ERROR",
+        "Paystack returned an invalid response.",
+        {
+          provider: this.name,
+          status: response.status,
+        },
+      );
     }
 
     if (!response.ok || !payload.status) {
@@ -155,7 +208,10 @@ export class PaystackProvider implements BankProvider {
           ? "AUTHENTICATION_FAILED"
           : response.status === 429
             ? "RATE_LIMITED"
-            : operation === "account" && (response.status === 400 || response.status === 404 || response.status === 422)
+            : operation === "account" &&
+                (response.status === 400 ||
+                  response.status === 404 ||
+                  response.status === 422)
               ? "ACCOUNT_NOT_FOUND"
               : "PROVIDER_ERROR";
       throw new NairaGateError(code, "Paystack request failed.", {

@@ -57,11 +57,11 @@ NairaGate is not a replacement for NIBSS, a bank, regulatory compliance, KYC obl
 
 ## Provider status
 
-| Provider | Bank discovery | Account resolution | Status |
-| --- | --- | --- | --- |
-| Paystack | Yes | Yes | Implemented |
-| Flutterwave | Planned | Planned | Roadmap |
-| Other native providers | Planned | Planned | Roadmap |
+| Provider               | Bank discovery | Account resolution | Status      |
+| ---------------------- | -------------- | ------------------ | ----------- |
+| Paystack               | Yes            | Yes                | Implemented |
+| Flutterwave            | Planned        | Planned            | Roadmap     |
+| Other native providers | Planned        | Planned            | Roadmap     |
 
 A provider appearing on the roadmap does not mean it is currently supported. New integrations are only marked implemented after the adapter, error mapping, documentation and automated tests are complete.
 
