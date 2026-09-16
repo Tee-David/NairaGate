@@ -1,0 +1,39 @@
+name: Bug report
+description: Report a reproducible NairaGate defect
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Thanks for helping improve NairaGate. Never include secret keys or real account-holder data."
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the observed and expected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Provide the smallest safe example that reproduces the issue.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: NairaGate version
+      placeholder: 0.1.0
+  - type: input
+    id: runtime
+    attributes:
+      label: Runtime
+      placeholder: Node.js 24
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Data safety
+      options:
+        - label: I removed credentials, real account numbers, names, and other sensitive data.
+          required: true
