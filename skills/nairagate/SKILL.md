@@ -1,6 +1,6 @@
 ---
 name: nairagate
-description: Integrate Nigerian bank discovery and account-name resolution with NairaGate. Use when building, reviewing, testing, or securing Nigerian fintech flows that need bank lists or server-side account resolution through supported NairaGate providers.
+description: Integrate Nigerian bank discovery and account-name resolution with NairaGate. Use when building, reviewing, testing, or securing Nigerian fintech flows that need bank lists or server-side account resolution through the NairaGate SDK or MCP server.
 license: Apache-2.0
 compatibility: Requires Node.js 20+ for NairaGate runtime integrations. Provider credentials must remain server-side.
 metadata:
@@ -23,7 +23,7 @@ Use NairaGate as the provider-neutral boundary for Nigerian bank discovery and a
 
 ## TypeScript integration
 
-Install the published `nairagate` package when available. Until publication, use the repository source for development.
+Use the `nairagate` package after its public npm release. Before publication, use the repository source for development.
 
 Create the provider on the server, read the secret from the environment, and pass the provider to `createNairaGate`.
 
@@ -43,6 +43,15 @@ const account = await nairaGate.accounts.resolve({
   bankCode: "058",
 });
 ```
+
+## MCP integration
+
+NairaGate includes a stdio MCP server exposed by the `nairagate-mcp` binary. It provides two read-only tools:
+
+- `list_banks` lists banks available through the configured provider.
+- `resolve_account` resolves an account holder name from a validated Nigerian account number and bank code.
+
+The MCP process reads `PAYSTACK_SECRET_KEY` from its server-side environment. Never put the provider credential into prompts or tool arguments. Treat MCP hosts as application boundaries: only configure the server in environments where the credential and returned financial data are appropriately protected.
 
 ## When generating an API route
 
