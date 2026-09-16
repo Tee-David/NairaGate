@@ -9,42 +9,46 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 describe("PaystackProvider", () => {
-  it("requires a secret key", () => {
-    expect(() => new PaystackProvider({ secretKey: "" })).toThrowError(NairaGateError);
+  it("requires a non-empty secret key", () => {
+    expect(() => new PaystackProvider({ secretKey: "   " })).toThrowError(NairaGateError);
   });
 
-  it("lists, de-duplicates, and sorts banks", async () => {
+  it("lists, de-duplicates, ignores malformed entries, and sorts banks", async () => {
     const fetcher = vi.fn(() =>
       Promise.resolve(
         jsonResponse({
           status: true,
-          message: "ok",
           data: [
             { name: "Zenith Bank", code: "057" },
             { name: "Access Bank", code: "044" },
             { name: "Access Duplicate", code: "044" },
+            { name: "Missing code" },
+            null,
           ],
         }),
       ),
     );
     const provider = new PaystackProvider({ secretKey: "sk_test_example", fetch: fetcher });
     await expect(provider.listBanks()).resolves.toEqual([
-      { name: "Access Duplicate", code: "044" },
+      { name: "Access Bank", code: "044" },
       { name: "Zenith Bank", code: "057" },
     ]);
   });
 
-  it("resolves and normalizes an account", async () => {
+  it("sends the expected authorization header and normalizes an account", async () => {
     const fetcher = vi.fn(() =>
       Promise.resolve(
         jsonResponse({
           status: true,
-          message: "ok",
           data: { account_number: "0123456789", account_name: "Test User" },
         }),
       ),
     );
-    const provider = new PaystackProvider({ secretKey: "sk_test_example", fetch: fetcher });
+    const provider = new PaystackProvider({
+      secretKey: " sk_test_example ",
+      fetch: fetcher,
+      baseUrl: "https://example.test/",
+    });
     await expect(
       provider.resolveAccount({ accountNumber: "0123456789", bankCode: "058" }),
     ).resolves.toEqual({
@@ -52,9 +56,13 @@ describe("PaystackProvider", () => {
       accountName: "Test User",
       bankCode: "058",
     });
-    expect(String(fetcher.mock.calls[0]?.[0])).toContain(
-      "account_number=0123456789&bank_code=058",
+    expect(String(fetcher.mock.calls[0]?.[0])).toBe(
+      "https://example.test/bank/resolve?account_number=0123456789&bank_code=058",
     );
+    expect(fetcher.mock.calls[0]?.[1]?.headers).toEqual({
+      Authorization: "Bearer sk_test_example",
+      Accept: "application/json",
+    });
   });
 
   it("rejects invalid input before a network request", async () => {
@@ -63,18 +71,19 @@ describe("PaystackProvider", () => {
     await expect(
       provider.resolveAccount({ accountNumber: "123", bankCode: "058" }),
     ).rejects.toMatchObject({ code: "INVALID_INPUT" });
+    await expect(
+      provider.resolveAccount({ accountNumber: "0123456789", bankCode: "x" }),
+    ).rejects.toMatchObject({ code: "INVALID_INPUT" });
     expect(fetcher).not.toHaveBeenCalled();
   });
 
   it.each([
     [401, "AUTHENTICATION_FAILED"],
-    [404, "ACCOUNT_NOT_FOUND"],
+    [403, "AUTHENTICATION_FAILED"],
     [429, "RATE_LIMITED"],
     [500, "PROVIDER_ERROR"],
-  ] as const)("maps HTTP %i to %s", async (status, code) => {
-    const fetcher = vi.fn(() =>
-      Promise.resolve(jsonResponse({ status: false, message: "request failed" }, status)),
-    );
+  ] as const)("maps bank-list HTTP %i to %s", async (status, code) => {
+    const fetcher = vi.fn(() => Promise.resolve(jsonResponse({ status: false }, status)));
     const provider = new PaystackProvider({ secretKey: "sk_test_example", fetch: fetcher });
     await expect(provider.listBanks()).rejects.toMatchObject({
       code,
@@ -83,13 +92,41 @@ describe("PaystackProvider", () => {
     });
   });
 
-  it("normalizes malformed provider responses", async () => {
+  it.each([400, 404, 422] as const)("maps account HTTP %i to ACCOUNT_NOT_FOUND", async (status) => {
+    const fetcher = vi.fn(() =>
+      Promise.resolve(jsonResponse({ status: false, message: "sensitive upstream detail" }, status)),
+    );
+    const provider = new PaystackProvider({ secretKey: "sk_test_example", fetch: fetcher });
+    await expect(
+      provider.resolveAccount({ accountNumber: "0123456789", bankCode: "058" }),
+    ).rejects.toMatchObject({ code: "ACCOUNT_NOT_FOUND", status, message: "Paystack request failed." });
+  });
+
+  it("does not classify a bank-list 404 as an account lookup failure", async () => {
+    const fetcher = vi.fn(() => Promise.resolve(jsonResponse({ status: false }, 404)));
+    const provider = new PaystackProvider({ secretKey: "sk_test_example", fetch: fetcher });
+    await expect(provider.listBanks()).rejects.toMatchObject({ code: "PROVIDER_ERROR", status: 404 });
+  });
+
+  it("rejects a successful envelope with malformed bank data", async () => {
+    const fetcher = vi.fn(() => Promise.resolve(jsonResponse({ status: true, data: {} })));
+    const provider = new PaystackProvider({ secretKey: "sk_test_example", fetch: fetcher });
+    await expect(provider.listBanks()).rejects.toMatchObject({ code: "PROVIDER_ERROR" });
+  });
+
+  it("normalizes malformed JSON responses", async () => {
     const fetcher = vi.fn(() => Promise.resolve(new Response("not-json", { status: 502 })));
     const provider = new PaystackProvider({ secretKey: "sk_test_example", fetch: fetcher });
     await expect(provider.listBanks()).rejects.toMatchObject({
       code: "PROVIDER_ERROR",
       status: 502,
     });
+  });
+
+  it("rejects malformed envelopes", async () => {
+    const fetcher = vi.fn(() => Promise.resolve(jsonResponse({ data: [] })));
+    const provider = new PaystackProvider({ secretKey: "sk_test_example", fetch: fetcher });
+    await expect(provider.listBanks()).rejects.toMatchObject({ code: "PROVIDER_ERROR" });
   });
 
   it("normalizes network failures without leaking the secret", async () => {
@@ -109,7 +146,6 @@ describe("PaystackProvider", () => {
       Promise.resolve(
         jsonResponse({
           status: true,
-          message: "ok",
           data: { account_number: "0123456789" },
         }),
       ),
