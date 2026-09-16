@@ -16,7 +16,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ["examples/**/*.ts"],
+    files: ["examples/**/*.ts", "src/mcp.ts"],
     extends: [tseslint.configs.disableTypeChecked],
   },
 );
