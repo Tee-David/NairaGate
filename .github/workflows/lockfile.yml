@@ -1,4 +1,4 @@
-name: Generate lockfile
+name: Prepare release files
 
 on:
   workflow_dispatch:
@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  lockfile:
+  prepare:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -20,9 +20,19 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
-      - run: npm install --package-lock-only
+      - run: npm install
+      - run: npm run format:fix
       - uses: actions/upload-artifact@v6
         with:
-          name: package-lock
-          path: package-lock.json
+          name: release-prep
+          path: |
+            package-lock.json
+            package.json
+            README.md
+            src
+            tests
+            examples
+            docs
+            skills
+            .github
           if-no-files-found: error
