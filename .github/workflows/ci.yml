@@ -19,5 +19,11 @@ jobs:
           node-version: 24
       - name: Install dependencies
         run: npm install
-      - name: Quality gate
-        run: npm run check
+      - name: Diagnostic quality gate
+        run: |
+          npm run format:fix
+          git diff --no-ext-diff
+          npm run lint
+          npm run typecheck
+          npm run test
+          npm run build
