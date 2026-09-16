@@ -2,6 +2,11 @@ name: Generate lockfile
 
 on:
   workflow_dispatch:
+  push:
+    branches: [chore/release-green]
+    paths:
+      - package.json
+      - .github/workflows/lockfile.yml
 
 permissions:
   contents: read
