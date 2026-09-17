@@ -4,14 +4,16 @@ NairaGate's core is framework-agnostic and intended to run in trusted server-sid
 
 ## Install
 
-During pre-1.0 development, clone the repository and install dependencies:
+```bash
+npm install nairagate
+```
+
+To work on NairaGate itself instead of consuming it, clone the repository and install dependencies:
 
 ```bash
 npm install
 npm run check
 ```
-
-Once the package is published, installation will use the package name `nairagate`.
 
 ## Configure a provider
 

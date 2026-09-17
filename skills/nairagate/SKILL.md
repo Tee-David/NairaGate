@@ -24,7 +24,7 @@ Use NairaGate as the provider-neutral boundary for Nigerian bank discovery and a
 
 ## TypeScript integration
 
-Use the `nairagate` package after its public npm release. Before publication, use the repository source for development.
+Install the `nairagate` package from npm. To work on NairaGate itself instead of consuming it, use the repository source directly.
 
 Create the provider on the server, read the secret from the environment, and pass the provider to `createNairaGate`.
 
