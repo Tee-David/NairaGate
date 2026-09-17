@@ -47,6 +47,8 @@ const account = await nairaGate.accounts.resolve({
 
 `FlutterwaveProvider`, `KorapayProvider`, and `SquadProvider` take the same `{ secretKey }` shape as `PaystackProvider` and can be substituted directly. `MonnifyProvider` is the exception: it takes `{ apiKey, secretKey }` instead of a single `secretKey`, since it exchanges those for a short-lived OAuth2 token internally. In every case, only the provider construction changes; `createNairaGate` and the rest of the application code stay the same.
 
+For a "matched bank" suggestion as the user types an account number (before they've picked a bank), use `guessBankCandidates(accountNumber, banks)` with a bank list already fetched from `banks.list()`. It runs entirely offline against the account number's own CBN NUBAN check digit, never calls a provider, and returns `[]` instead of throwing for incomplete or malformed input, so it's safe to call on every keystroke. Never treat its result as a resolved identity; it is a suggestion the user confirms, and `accounts.resolve` remains the only authoritative check.
+
 ## MCP integration
 
 NairaGate includes a stdio MCP server exposed by the `nairagate-mcp` binary. It provides two read-only tools:

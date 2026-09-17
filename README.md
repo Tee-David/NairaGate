@@ -80,6 +80,7 @@ npx skills add https://github.com/Tee-David/NairaGate --skill nairagate
 - One typed contract instead of five separate provider integrations
 - Predictable `NairaGateError` codes instead of provider-specific failure handling
 - Input validated before any upstream call; credentials and calls stay server-side
+- `guessBankCandidates` offers an OPay-style "matched bank" suggestion offline, from the account number's own NUBAN check digit, with no network call
 - Deterministic, mockable tests with no live financial API calls
 - The same core across SDK, MCP, and Agent Skill
 

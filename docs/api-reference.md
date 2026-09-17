@@ -16,6 +16,19 @@ Creates an immutable NairaGate client around a `BankProvider`.
 
 `client.accounts.resolve(input)` returns `Promise<ResolvedAccount>`.
 
+## `guessBankCandidates(accountNumber, banks)`
+
+```ts
+function guessBankCandidates(
+  accountNumber: string,
+  banks: readonly Bank[],
+): Bank[];
+```
+
+Suggests which of the given banks a 10-digit account number could belong to, purely from its CBN NUBAN check digit: the "matched bank" suggestion pattern seen in apps like OPay, driven entirely offline with no network call. Pass the bank list from a prior `banks.list()` call; NairaGate never bundles its own bank directory. Only banks whose `code` is exactly 3 digits are ever candidates, since that's the only scheme the check-digit algorithm covers. Returns `[]` for anything that isn't a well-formed 10-digit string, so it's safe to call on every keystroke, and returns `[]` rather than throwing when nothing matches.
+
+More than one bank can share a matching check digit for the same digits, so treat the result as candidates for the user to confirm, never as a resolved identity. `accounts.resolve` is still the only authoritative source for who actually holds the account.
+
 ## `PaystackProvider`
 
 ```ts

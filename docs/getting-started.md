@@ -82,6 +82,18 @@ const banks = await nairaGate.banks.list();
 
 The provider returns a normalized, alphabetically sorted list and de-duplicates entries by provider bank code.
 
+## Suggest a bank as the user types
+
+Fetch `banks` once (above), then re-run this locally on every keystroke to offer a "matched bank" suggestion the way apps like OPay do, before the user has picked one:
+
+```ts
+import { guessBankCandidates } from "nairagate";
+
+const candidates = guessBankCandidates(accountNumberSoFar, banks);
+```
+
+This is entirely offline (no network call, no provider needed) because it works from the account number's own CBN NUBAN check digit. It only ever considers banks with a standard 3-digit code, returns `[]` (never throws) for anything not yet a complete 10-digit number, and can return more than one bank if their codes collide on the same check digit. Treat the result as a candidate to confirm, not a resolved identity; call `accounts.resolve` for the real answer.
+
 ## Resolve an account
 
 ```ts
