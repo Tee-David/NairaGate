@@ -185,6 +185,8 @@ Every implemented adapter is built against that provider's publicly documented R
 
 A provider appearing on the roadmap does not mean it is currently supported. New integrations are only marked implemented after the adapter, error mapping, documentation and automated tests are complete.
 
+**Deliberately not implemented yet:** Interswitch/Quickteller, Providus Bank, VFD Microfinance Bank, Remita, OPay, Paga, Wema Bank/ALAT, and Kuda were all considered for this round. Each either requires bilateral/enterprise onboarding rather than exposing a public, self-serve REST contract, or no sufficiently confident, verifiable API contract for bank discovery and account resolution could be established from this project's environment. They were left out rather than shipped against a guessed endpoint. See [ROADMAP.md](ROADMAP.md#providers-deliberately-not-implemented-yet) for detail, and open an issue if you can supply or verify current documentation for one of them.
+
 ## Development commands
 
 ```bash
