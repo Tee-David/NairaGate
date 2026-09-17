@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/nairagate-social-preview.png" alt="NairaGate — Nigerian banks, simplified" width="100%" />
+  <img src="assets/nairagate-social-preview.png" alt="NairaGate: Nigerian banks, simplified" width="100%" />
 </p>
 
 # NairaGate
@@ -15,7 +15,7 @@ Use NairaGate as a TypeScript SDK, an Agent Skill, or an MCP server for compatib
 
 **Created and maintained by Taiwo David Dayomola, Senior Software Engineer.**
 
-> **Status:** Pre-1.0 and under active development. Paystack is the first implemented provider. Flutterwave and other native provider support is on the roadmap. See [ROADMAP.md](ROADMAP.md).
+> **Status:** Pre-1.0 and under active development. Paystack, Flutterwave, Korapay, Squad and Monnify are implemented. See [ROADMAP.md](ROADMAP.md) for what's next and what was deliberately left out.
 
 ## Install
 
@@ -44,26 +44,76 @@ const account = await nairaGate.accounts.resolve({
 });
 ```
 
-Keep provider credentials server-side. Never place a Paystack secret key in browser code, mobile code, prompts, logs, or committed files.
+Every other provider implements the same `BankProvider` contract, so the application-facing API is identical; only the provider you construct changes:
+
+```ts
+import {
+  createNairaGate,
+  FlutterwaveProvider,
+  KorapayProvider,
+  SquadProvider,
+  MonnifyProvider,
+} from "nairagate";
+
+// Flutterwave
+createNairaGate({
+  provider: new FlutterwaveProvider({
+    secretKey: process.env.FLUTTERWAVE_SECRET_KEY!,
+  }),
+});
+
+// Korapay
+createNairaGate({
+  provider: new KorapayProvider({
+    secretKey: process.env.KORAPAY_SECRET_KEY!,
+  }),
+});
+
+// Squad
+createNairaGate({
+  provider: new SquadProvider({
+    secretKey: process.env.SQUAD_SECRET_KEY!,
+  }),
+});
+
+// Monnify (API key + secret key, not a single secret key)
+createNairaGate({
+  provider: new MonnifyProvider({
+    apiKey: process.env.MONNIFY_API_KEY!,
+    secretKey: process.env.MONNIFY_SECRET_KEY!,
+  }),
+});
+```
+
+Keep provider credentials server-side. Never place a provider secret key in browser code, mobile code, prompts, logs, or committed files.
 
 ## MCP server
 
 The npm package includes the `nairagate-mcp` stdio MCP server. It exposes the same NairaGate core to compatible AI clients without giving the model direct access to provider credentials.
 
-Set the provider credential in the environment of the process running the MCP server:
+Set the provider credential in the environment of the process running the MCP server. By default the server starts with Paystack:
 
 ```bash
 PAYSTACK_SECRET_KEY=your_secret_key npx -y nairagate nairagate-mcp
 ```
 
-When configuring an MCP client, use `npx` as the command, pass `-y`, `nairagate`, and `nairagate-mcp` as arguments, and provide `PAYSTACK_SECRET_KEY` through that client's secure environment configuration. Do not put the key in prompts or repository files.
+Set `NAIRAGATE_PROVIDER` to start it with a different provider instead:
+
+```bash
+NAIRAGATE_PROVIDER=flutterwave FLUTTERWAVE_SECRET_KEY=your_secret_key npx -y nairagate nairagate-mcp
+NAIRAGATE_PROVIDER=korapay KORAPAY_SECRET_KEY=your_secret_key npx -y nairagate nairagate-mcp
+NAIRAGATE_PROVIDER=squad SQUAD_SECRET_KEY=your_secret_key npx -y nairagate nairagate-mcp
+NAIRAGATE_PROVIDER=monnify MONNIFY_API_KEY=your_api_key MONNIFY_SECRET_KEY=your_secret_key npx -y nairagate nairagate-mcp
+```
+
+When configuring an MCP client, use `npx` as the command, pass `-y`, `nairagate`, and `nairagate-mcp` as arguments, and provide the matching credential(s) through that client's secure environment configuration. Do not put credentials in prompts or repository files.
 
 ### MCP tools
 
-| Tool | Purpose | Input |
-| --- | --- | --- |
-| `list_banks` | List Nigerian banks available through the configured provider | None |
-| `resolve_account` | Resolve an account holder name | `accountNumber`, `bankCode` |
+| Tool              | Purpose                                                       | Input                       |
+| ----------------- | ------------------------------------------------------------- | --------------------------- |
+| `list_banks`      | List Nigerian banks available through the configured provider | None                        |
+| `resolve_account` | Resolve an account holder name                                | `accountNumber`, `bankCode` |
 
 Both tools are read-only from the MCP client's perspective. Account numbers and resolved names should still be treated as privacy-sensitive financial data.
 
@@ -101,9 +151,9 @@ Application/Agent --+-- NairaGate Agent Skill
                          NairaGate Core
                               |
                       Provider Interface
-                       |             |
-                   Paystack     Flutterwave
-                    today        roadmap
+                       |       |       |       |       |
+                   Paystack Flutterwave Korapay Squad Monnify
+                       all implemented, behind the same BankProvider contract
 ```
 
 Your application depends on NairaGate's stable domain contract. Provider adapters own provider-specific authentication, endpoints, payloads, response normalization and failure mapping. The SDK, Skill and MCP interface all converge on the same core rather than creating separate banking implementations.
@@ -122,13 +172,20 @@ NairaGate is not a replacement for NIBSS, a bank, regulatory compliance, KYC obl
 
 ## Provider status
 
-| Provider | Bank discovery | Account resolution | Status |
-| --- | --- | --- | --- |
-| Paystack | Yes | Yes | Implemented |
-| Flutterwave | Planned | Planned | Roadmap |
-| Other native providers | Planned | Planned | Roadmap |
+| Provider               | Bank discovery | Account resolution | Credential shape              | Status      |
+| ---------------------- | -------------- | ------------------ | ----------------------------- | ----------- |
+| Paystack               | Yes            | Yes                | Secret key                    | Implemented |
+| Flutterwave            | Yes            | Yes                | Secret key                    | Implemented |
+| Korapay                | Yes            | Yes                | Secret key                    | Implemented |
+| Squad                  | Yes            | Yes                | Secret key                    | Implemented |
+| Monnify                | Yes            | Yes                | API key + secret key (OAuth2) | Implemented |
+| Other native providers | Planned        | Planned            | n/a                           | Roadmap     |
+
+Every implemented adapter is built against that provider's publicly documented REST API and is covered by deterministic tests with an injected `fetch` boundary; no live financial calls are made in the test suite. **None of the Flutterwave, Korapay, Squad, or Monnify adapters have been exercised against a live provider key yet** (this repository's development environment could not reach those providers' documentation or sandbox APIs directly). Paystack is the only adapter that predates this constraint and reflects a real integration. Run your own sandbox smoke test against each provider before depending on it in production. See the caveats in [ROADMAP.md](ROADMAP.md) for what is comparatively less certain per provider (for example, Monnify's and Squad's exact bank-discovery endpoint and field names).
 
 A provider appearing on the roadmap does not mean it is currently supported. New integrations are only marked implemented after the adapter, error mapping, documentation and automated tests are complete.
+
+**Deliberately not implemented yet:** Interswitch/Quickteller, Providus Bank, VFD Microfinance Bank, Remita, OPay, Paga, Wema Bank/ALAT, and Kuda were all considered for this round. Each either requires bilateral/enterprise onboarding rather than exposing a public, self-serve REST contract, or no sufficiently confident, verifiable API contract for bank discovery and account resolution could be established from this project's environment. They were left out rather than shipped against a guessed endpoint. See [ROADMAP.md](ROADMAP.md#providers-deliberately-not-implemented-yet) for detail, and open an issue if you can supply or verify current documentation for one of them.
 
 ## Development commands
 

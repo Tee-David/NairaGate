@@ -5,17 +5,67 @@ import { serveStdio } from "@modelcontextprotocol/server/stdio";
 import { z } from "zod";
 import { createNairaGate } from "./client.js";
 import { NairaGateError } from "./errors.js";
+import type { BankProvider } from "./types.js";
 import { PaystackProvider } from "./providers/paystack.js";
+import { FlutterwaveProvider } from "./providers/flutterwave.js";
+import { KorapayProvider } from "./providers/korapay.js";
+import { SquadProvider } from "./providers/squad.js";
+import { MonnifyProvider } from "./providers/monnify.js";
+
+const SUPPORTED_PROVIDERS = [
+  "paystack",
+  "flutterwave",
+  "korapay",
+  "squad",
+  "monnify",
+] as const;
+type SupportedProvider = (typeof SUPPORTED_PROVIDERS)[number];
+
+function requireEnv(name: string, requestedFor: SupportedProvider): string {
+  const value = process.env[name]?.trim();
+  if (!value) {
+    throw new Error(
+      `${name} is required to start nairagate-mcp with NAIRAGATE_PROVIDER=${requestedFor}.`,
+    );
+  }
+  return value;
+}
+
+function resolveProvider(): BankProvider {
+  const requested = (process.env.NAIRAGATE_PROVIDER?.trim().toLowerCase() ||
+    "paystack") as SupportedProvider;
+
+  switch (requested) {
+    case "paystack":
+      return new PaystackProvider({
+        secretKey: requireEnv("PAYSTACK_SECRET_KEY", requested),
+      });
+    case "flutterwave":
+      return new FlutterwaveProvider({
+        secretKey: requireEnv("FLUTTERWAVE_SECRET_KEY", requested),
+      });
+    case "korapay":
+      return new KorapayProvider({
+        secretKey: requireEnv("KORAPAY_SECRET_KEY", requested),
+      });
+    case "squad":
+      return new SquadProvider({
+        secretKey: requireEnv("SQUAD_SECRET_KEY", requested),
+      });
+    case "monnify":
+      return new MonnifyProvider({
+        apiKey: requireEnv("MONNIFY_API_KEY", requested),
+        secretKey: requireEnv("MONNIFY_SECRET_KEY", requested),
+      });
+    default:
+      throw new Error(
+        `Unsupported NAIRAGATE_PROVIDER "${requested}". Supported providers: ${SUPPORTED_PROVIDERS.join(", ")}.`,
+      );
+  }
+}
 
 function createServer(): McpServer {
-  const secretKey = process.env.PAYSTACK_SECRET_KEY?.trim();
-  if (!secretKey) {
-    throw new Error("PAYSTACK_SECRET_KEY is required to start nairagate-mcp.");
-  }
-
-  const nairaGate = createNairaGate({
-    provider: new PaystackProvider({ secretKey }),
-  });
+  const nairaGate = createNairaGate({ provider: resolveProvider() });
   const server = new McpServer({
     name: "nairagate",
     version: "0.1.0",
