@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/nairagate-social-preview.png" alt="NairaGate — Nigerian banks, simplified" width="100%" />
+  <img src="assets/nairagate-social-preview.png" alt="NairaGate: Nigerian banks, simplified" width="100%" />
 </p>
 
 # NairaGate
@@ -44,7 +44,7 @@ const account = await nairaGate.accounts.resolve({
 });
 ```
 
-Every other provider implements the same `BankProvider` contract, so the application-facing API is identical — only the provider you construct changes:
+Every other provider implements the same `BankProvider` contract, so the application-facing API is identical; only the provider you construct changes:
 
 ```ts
 import {
@@ -179,9 +179,9 @@ NairaGate is not a replacement for NIBSS, a bank, regulatory compliance, KYC obl
 | Korapay                | Yes            | Yes                | Secret key                    | Implemented |
 | Squad                  | Yes            | Yes                | Secret key                    | Implemented |
 | Monnify                | Yes            | Yes                | API key + secret key (OAuth2) | Implemented |
-| Other native providers | Planned        | Planned            | —                             | Roadmap     |
+| Other native providers | Planned        | Planned            | n/a                           | Roadmap     |
 
-Every implemented adapter is built against that provider's publicly documented REST API and is covered by deterministic tests with an injected `fetch` boundary — no live financial calls are made in the test suite. **None of the Flutterwave, Korapay, Squad, or Monnify adapters have been exercised against a live provider key yet** (this repository's development environment could not reach those providers' documentation or sandbox APIs directly). Paystack is the only adapter that predates this constraint and reflects a real integration. Run your own sandbox smoke test against each provider before depending on it in production — see the caveats in [ROADMAP.md](ROADMAP.md) for what is comparatively less certain per provider (for example, Monnify's and Squad's exact bank-discovery endpoint and field names).
+Every implemented adapter is built against that provider's publicly documented REST API and is covered by deterministic tests with an injected `fetch` boundary; no live financial calls are made in the test suite. **None of the Flutterwave, Korapay, Squad, or Monnify adapters have been exercised against a live provider key yet** (this repository's development environment could not reach those providers' documentation or sandbox APIs directly). Paystack is the only adapter that predates this constraint and reflects a real integration. Run your own sandbox smoke test against each provider before depending on it in production. See the caveats in [ROADMAP.md](ROADMAP.md) for what is comparatively less certain per provider (for example, Monnify's and Squad's exact bank-discovery endpoint and field names).
 
 A provider appearing on the roadmap does not mean it is currently supported. New integrations are only marked implemented after the adapter, error mapping, documentation and automated tests are complete.
 

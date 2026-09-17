@@ -68,7 +68,7 @@ new SquadProvider({
 });
 ```
 
-`secretKey` is required and must remain server-side. `baseUrl` defaults to `https://api-d.squadco.com` (Squad also documents a distinct sandbox host — pass it as `baseUrl` if your key is sandbox-scoped). Bank discovery calls `GET /transaction/ussd/banklist` and account resolution calls `POST /payout/account/lookup` with `{ bank_code, account_number }`. Squad's bank-list response field names were not independently verifiable in this project's environment, so the adapter accepts both `name`/`code` and `bank_name`/`bank_code` field spellings defensively — verify this against a live response before depending on it.
+`secretKey` is required and must remain server-side. `baseUrl` defaults to `https://api-d.squadco.com` (Squad also documents a distinct sandbox host; pass it as `baseUrl` if your key is sandbox-scoped). Bank discovery calls `GET /transaction/ussd/banklist` and account resolution calls `POST /payout/account/lookup` with `{ bank_code, account_number }`. Squad's bank-list response field names were not independently verifiable in this project's environment, so the adapter accepts both `name`/`code` and `bank_name`/`bank_code` field spellings defensively. Verify this against a live response before depending on it.
 
 ## `MonnifyProvider`
 
