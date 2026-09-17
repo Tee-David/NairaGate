@@ -58,11 +58,14 @@ Each adapter is built against its provider's public REST API and covered by dete
 The package ships `nairagate-mcp`, a stdio MCP server exposing `list_banks` and `resolve_account` as read-only tools, without giving the model direct access to credentials.
 
 ```bash
-PAYSTACK_SECRET_KEY=your_secret_key npx -y nairagate nairagate-mcp
+NAIRAGATE_PROVIDER=paystack PAYSTACK_SECRET_KEY=your_secret_key npx -y nairagate nairagate-mcp
 NAIRAGATE_PROVIDER=flutterwave FLUTTERWAVE_SECRET_KEY=your_secret_key npx -y nairagate nairagate-mcp
+NAIRAGATE_PROVIDER=korapay KORAPAY_SECRET_KEY=your_secret_key npx -y nairagate nairagate-mcp
+NAIRAGATE_PROVIDER=squad SQUAD_SECRET_KEY=your_secret_key npx -y nairagate nairagate-mcp
+NAIRAGATE_PROVIDER=monnify MONNIFY_API_KEY=your_api_key MONNIFY_SECRET_KEY=your_secret_key npx -y nairagate nairagate-mcp
 ```
 
-`NAIRAGATE_PROVIDER` selects `paystack` (default), `flutterwave`, `korapay`, `squad`, or `monnify`; each reads its own credential env var(s). Never put credentials in prompts or repository files.
+`NAIRAGATE_PROVIDER` defaults to `paystack` if omitted; each provider reads its own credential env var(s). Never put credentials in prompts or repository files.
 
 ## Agent Skill
 
