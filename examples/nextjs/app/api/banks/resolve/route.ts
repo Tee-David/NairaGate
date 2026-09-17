@@ -1,3 +1,6 @@
+// Uses Paystack as the illustrative provider. FlutterwaveProvider,
+// KorapayProvider, SquadProvider and MonnifyProvider implement the same
+// BankProvider contract, so swapping providers only changes this block.
 import { NairaGateError, PaystackProvider, createNairaGate } from "nairagate";
 
 const secretKey = process.env.PAYSTACK_SECRET_KEY?.trim();

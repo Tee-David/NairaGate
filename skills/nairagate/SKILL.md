@@ -45,6 +45,8 @@ const account = await nairaGate.accounts.resolve({
 });
 ```
 
+`FlutterwaveProvider`, `KorapayProvider`, and `SquadProvider` take the same `{ secretKey }` shape as `PaystackProvider` and can be substituted directly. `MonnifyProvider` is the exception: it takes `{ apiKey, secretKey }` instead of a single `secretKey`, since it exchanges those for a short-lived OAuth2 token internally. In every case, only the provider construction changes; `createNairaGate` and the rest of the application code stay the same.
+
 ## MCP integration
 
 NairaGate includes a stdio MCP server exposed by the `nairagate-mcp` binary. It provides two read-only tools:

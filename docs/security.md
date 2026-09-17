@@ -14,7 +14,7 @@ Pass provider credentials from the runtime environment. Never hardcode them in s
 
 ## Network failures
 
-The Paystack provider uses a finite request timeout and converts network/provider failures into typed `NairaGateError` instances. Applications should return generic client-facing errors rather than exposing upstream payloads or credentials.
+Every implemented provider (Paystack, Flutterwave, Korapay, Squad, Monnify) uses a finite request timeout and converts network/provider failures into typed `NairaGateError` instances. Applications should return generic client-facing errors rather than exposing upstream payloads or credentials.
 
 ## Privacy
 
