@@ -34,7 +34,7 @@ const nairaGate = createNairaGate({
 
 const banks = await nairaGate.banks.list();
 const account = await nairaGate.accounts.resolve({
-  accountNumber: "0123456789",
+  accountNumber: "0123456785",
   bankCode: "058",
 });
 ```

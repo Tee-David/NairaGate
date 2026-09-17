@@ -95,7 +95,7 @@ type ResolveAccountInput = {
 };
 ```
 
-NairaGate currently validates Nigerian account numbers as exactly ten digits and provider bank codes as two to six digits.
+NairaGate currently validates Nigerian account numbers as exactly ten digits and provider bank codes as two to six digits. When `bankCode` is exactly 3 digits (the standard CBN code for a deposit money bank), the account number's 10th digit is also checked against the CBN NUBAN check-digit algorithm before any provider call. Longer, provider-specific codes (fintechs, microfinance banks) don't follow that scheme, so the check-digit is skipped for those.
 
 ## `ResolvedAccount`
 

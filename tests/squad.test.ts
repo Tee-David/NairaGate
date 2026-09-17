@@ -54,7 +54,7 @@ describe("SquadProvider", () => {
         status: 200,
         success: true,
         message: "Success",
-        data: { account_name: "JENNY SQUAD", account_number: "0123456789" },
+        data: { account_name: "JENNY SQUAD", account_number: "0123456785" },
       }),
     );
     const provider = new SquadProvider({
@@ -63,9 +63,9 @@ describe("SquadProvider", () => {
       baseUrl: "https://example.test",
     });
     await expect(
-      provider.resolveAccount({ accountNumber: "0123456789", bankCode: "058" }),
+      provider.resolveAccount({ accountNumber: "0123456785", bankCode: "058" }),
     ).resolves.toEqual({
-      accountNumber: "0123456789",
+      accountNumber: "0123456785",
       accountName: "JENNY SQUAD",
       bankCode: "058",
     });
@@ -79,7 +79,7 @@ describe("SquadProvider", () => {
       "Content-Type": "application/json",
     });
     expect(init?.body).toBe(
-      JSON.stringify({ bank_code: "058", account_number: "0123456789" }),
+      JSON.stringify({ bank_code: "058", account_number: "0123456785" }),
     );
   });
 
@@ -93,7 +93,7 @@ describe("SquadProvider", () => {
       provider.resolveAccount({ accountNumber: "123", bankCode: "058" }),
     ).rejects.toMatchObject({ code: "INVALID_INPUT" });
     await expect(
-      provider.resolveAccount({ accountNumber: "0123456789", bankCode: "x" }),
+      provider.resolveAccount({ accountNumber: "0123456785", bankCode: "x" }),
     ).rejects.toMatchObject({ code: "INVALID_INPUT" });
     expect(fetcher).not.toHaveBeenCalled();
   });
@@ -133,7 +133,7 @@ describe("SquadProvider", () => {
       });
       await expect(
         provider.resolveAccount({
-          accountNumber: "0123456789",
+          accountNumber: "0123456785",
           bankCode: "058",
         }),
       ).rejects.toMatchObject({
@@ -219,7 +219,7 @@ describe("SquadProvider", () => {
       jsonResponse({
         status: 200,
         success: true,
-        data: { account_number: "0123456789" },
+        data: { account_number: "0123456785" },
       }),
     );
     const provider = new SquadProvider({
@@ -227,7 +227,7 @@ describe("SquadProvider", () => {
       fetch: fetcher,
     });
     await expect(
-      provider.resolveAccount({ accountNumber: "0123456789", bankCode: "058" }),
+      provider.resolveAccount({ accountNumber: "0123456785", bankCode: "058" }),
     ).rejects.toMatchObject({ code: "PROVIDER_ERROR" });
   });
 });

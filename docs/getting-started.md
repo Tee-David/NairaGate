@@ -86,7 +86,7 @@ The provider returns a normalized, alphabetically sorted list and de-duplicates 
 
 ```ts
 const account = await nairaGate.accounts.resolve({
-  accountNumber: "0123456789",
+  accountNumber: "0123456785",
   bankCode: "058",
 });
 ```

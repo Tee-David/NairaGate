@@ -12,6 +12,7 @@ All notable changes to NairaGate are documented here. The project follows Semant
 - Monnify provider (`MonnifyProvider`), the first adapter authenticating via OAuth2 (API key + secret key exchanged for a cached, auto-refreshing bearer token) rather than a static secret key
 - `NAIRAGATE_PROVIDER` environment variable to select the `nairagate-mcp` provider (`paystack`, `flutterwave`, `korapay`, `squad`, or `monnify`)
 - Deterministic tests for all four new providers' bank listing, account resolution, error mapping, and (for Monnify) token caching and expiry
+- CBN NUBAN check-digit validation for the standard 3-digit bank-code case, rejecting a malformed account number before any provider call instead of after a network round trip
 
 ### Planned
 

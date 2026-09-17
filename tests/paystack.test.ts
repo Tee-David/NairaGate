@@ -73,7 +73,7 @@ describe("PaystackProvider", () => {
     const fetcher = mockFetch(
       jsonResponse({
         status: true,
-        data: { account_number: "0123456789", account_name: "Test User" },
+        data: { account_number: "0123456785", account_name: "Test User" },
       }),
     );
     const provider = new PaystackProvider({
@@ -82,16 +82,16 @@ describe("PaystackProvider", () => {
       baseUrl: "https://example.test/",
     });
     await expect(
-      provider.resolveAccount({ accountNumber: "0123456789", bankCode: "058" }),
+      provider.resolveAccount({ accountNumber: "0123456785", bankCode: "058" }),
     ).resolves.toEqual({
-      accountNumber: "0123456789",
+      accountNumber: "0123456785",
       accountName: "Test User",
       bankCode: "058",
     });
     expect(fetcher).toHaveBeenCalledOnce();
     const [url, init] = vi.mocked(fetcher).mock.calls[0] ?? [];
     expect(url).toBe(
-      "https://example.test/bank/resolve?account_number=0123456789&bank_code=058",
+      "https://example.test/bank/resolve?account_number=0123456785&bank_code=058",
     );
     expect(init?.headers).toEqual({
       Authorization: "Bearer sk_test_example",
@@ -109,7 +109,7 @@ describe("PaystackProvider", () => {
       provider.resolveAccount({ accountNumber: "123", bankCode: "058" }),
     ).rejects.toMatchObject({ code: "INVALID_INPUT" });
     await expect(
-      provider.resolveAccount({ accountNumber: "0123456789", bankCode: "x" }),
+      provider.resolveAccount({ accountNumber: "0123456785", bankCode: "x" }),
     ).rejects.toMatchObject({ code: "INVALID_INPUT" });
     expect(fetcher).not.toHaveBeenCalled();
   });
@@ -147,7 +147,7 @@ describe("PaystackProvider", () => {
       });
       await expect(
         provider.resolveAccount({
-          accountNumber: "0123456789",
+          accountNumber: "0123456785",
           bankCode: "058",
         }),
       ).rejects.toMatchObject({
@@ -228,7 +228,7 @@ describe("PaystackProvider", () => {
     const fetcher = mockFetch(
       jsonResponse({
         status: true,
-        data: { account_number: "0123456789" },
+        data: { account_number: "0123456785" },
       }),
     );
     const provider = new PaystackProvider({
@@ -236,7 +236,7 @@ describe("PaystackProvider", () => {
       fetch: fetcher,
     });
     await expect(
-      provider.resolveAccount({ accountNumber: "0123456789", bankCode: "058" }),
+      provider.resolveAccount({ accountNumber: "0123456785", bankCode: "058" }),
     ).rejects.toMatchObject({ code: "PROVIDER_ERROR" });
   });
 });

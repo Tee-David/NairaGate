@@ -52,7 +52,7 @@ describe("FlutterwaveProvider", () => {
       jsonResponse({
         status: "success",
         message: "Account details fetched",
-        data: { account_number: "0690000031", account_name: "Test User" },
+        data: { account_number: "0690000032", account_name: "Test User" },
       }),
     );
     const provider = new FlutterwaveProvider({
@@ -61,9 +61,9 @@ describe("FlutterwaveProvider", () => {
       baseUrl: "https://example.test/v3",
     });
     await expect(
-      provider.resolveAccount({ accountNumber: "0690000031", bankCode: "044" }),
+      provider.resolveAccount({ accountNumber: "0690000032", bankCode: "044" }),
     ).resolves.toEqual({
-      accountNumber: "0690000031",
+      accountNumber: "0690000032",
       accountName: "Test User",
       bankCode: "044",
     });
@@ -77,7 +77,7 @@ describe("FlutterwaveProvider", () => {
       "Content-Type": "application/json",
     });
     expect(init?.body).toBe(
-      JSON.stringify({ account_number: "0690000031", account_bank: "044" }),
+      JSON.stringify({ account_number: "0690000032", account_bank: "044" }),
     );
   });
 
@@ -91,7 +91,7 @@ describe("FlutterwaveProvider", () => {
       provider.resolveAccount({ accountNumber: "123", bankCode: "044" }),
     ).rejects.toMatchObject({ code: "INVALID_INPUT" });
     await expect(
-      provider.resolveAccount({ accountNumber: "0690000031", bankCode: "x" }),
+      provider.resolveAccount({ accountNumber: "0690000032", bankCode: "x" }),
     ).rejects.toMatchObject({ code: "INVALID_INPUT" });
     expect(fetcher).not.toHaveBeenCalled();
   });
@@ -128,7 +128,7 @@ describe("FlutterwaveProvider", () => {
       });
       await expect(
         provider.resolveAccount({
-          accountNumber: "0690000031",
+          accountNumber: "0690000032",
           bankCode: "044",
         }),
       ).rejects.toMatchObject({
@@ -211,7 +211,7 @@ describe("FlutterwaveProvider", () => {
     const fetcher = mockFetch(
       jsonResponse({
         status: "success",
-        data: { account_number: "0690000031" },
+        data: { account_number: "0690000032" },
       }),
     );
     const provider = new FlutterwaveProvider({
@@ -219,7 +219,7 @@ describe("FlutterwaveProvider", () => {
       fetch: fetcher,
     });
     await expect(
-      provider.resolveAccount({ accountNumber: "0690000031", bankCode: "044" }),
+      provider.resolveAccount({ accountNumber: "0690000032", bankCode: "044" }),
     ).rejects.toMatchObject({ code: "PROVIDER_ERROR" });
   });
 });
