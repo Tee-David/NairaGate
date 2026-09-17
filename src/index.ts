@@ -4,6 +4,8 @@ export { NairaGateError } from "./errors.js";
 export type { NairaGateErrorCode } from "./errors.js";
 export { PaystackProvider } from "./providers/paystack.js";
 export type { PaystackProviderOptions } from "./providers/paystack.js";
+export { FlutterwaveProvider } from "./providers/flutterwave.js";
+export type { FlutterwaveProviderOptions } from "./providers/flutterwave.js";
 export type {
   Bank,
   BankProvider,

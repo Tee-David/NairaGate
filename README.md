@@ -15,7 +15,7 @@ Use NairaGate as a TypeScript SDK, an Agent Skill, or an MCP server for compatib
 
 **Created and maintained by Taiwo David Dayomola, Senior Software Engineer.**
 
-> **Status:** Pre-1.0 and under active development. Paystack is the first implemented provider. Flutterwave and other native provider support is on the roadmap. See [ROADMAP.md](ROADMAP.md).
+> **Status:** Pre-1.0 and under active development. Paystack and Flutterwave are implemented. Other native provider support is on the roadmap. See [ROADMAP.md](ROADMAP.md).
 
 ## Install
 
@@ -44,26 +44,45 @@ const account = await nairaGate.accounts.resolve({
 });
 ```
 
-Keep provider credentials server-side. Never place a Paystack secret key in browser code, mobile code, prompts, logs, or committed files.
+Swap in `FlutterwaveProvider` to use Flutterwave instead. The application-facing API is identical; only the provider you construct changes:
+
+```ts
+import { createNairaGate, FlutterwaveProvider } from "nairagate";
+
+const secretKey = process.env.FLUTTERWAVE_SECRET_KEY;
+if (!secretKey) throw new Error("FLUTTERWAVE_SECRET_KEY is required.");
+
+const nairaGate = createNairaGate({
+  provider: new FlutterwaveProvider({ secretKey }),
+});
+```
+
+Keep provider credentials server-side. Never place a provider secret key in browser code, mobile code, prompts, logs, or committed files.
 
 ## MCP server
 
 The npm package includes the `nairagate-mcp` stdio MCP server. It exposes the same NairaGate core to compatible AI clients without giving the model direct access to provider credentials.
 
-Set the provider credential in the environment of the process running the MCP server:
+Set the provider credential in the environment of the process running the MCP server. By default the server starts with Paystack:
 
 ```bash
 PAYSTACK_SECRET_KEY=your_secret_key npx -y nairagate nairagate-mcp
 ```
 
-When configuring an MCP client, use `npx` as the command, pass `-y`, `nairagate`, and `nairagate-mcp` as arguments, and provide `PAYSTACK_SECRET_KEY` through that client's secure environment configuration. Do not put the key in prompts or repository files.
+Set `NAIRAGATE_PROVIDER=flutterwave` to start it with Flutterwave instead:
+
+```bash
+NAIRAGATE_PROVIDER=flutterwave FLUTTERWAVE_SECRET_KEY=your_secret_key npx -y nairagate nairagate-mcp
+```
+
+When configuring an MCP client, use `npx` as the command, pass `-y`, `nairagate`, and `nairagate-mcp` as arguments, and provide the matching secret key through that client's secure environment configuration. Do not put the key in prompts or repository files.
 
 ### MCP tools
 
-| Tool | Purpose | Input |
-| --- | --- | --- |
-| `list_banks` | List Nigerian banks available through the configured provider | None |
-| `resolve_account` | Resolve an account holder name | `accountNumber`, `bankCode` |
+| Tool              | Purpose                                                       | Input                       |
+| ----------------- | ------------------------------------------------------------- | --------------------------- |
+| `list_banks`      | List Nigerian banks available through the configured provider | None                        |
+| `resolve_account` | Resolve an account holder name                                | `accountNumber`, `bankCode` |
 
 Both tools are read-only from the MCP client's perspective. Account numbers and resolved names should still be treated as privacy-sensitive financial data.
 
@@ -103,7 +122,7 @@ Application/Agent --+-- NairaGate Agent Skill
                       Provider Interface
                        |             |
                    Paystack     Flutterwave
-                    today        roadmap
+                  implemented   implemented
 ```
 
 Your application depends on NairaGate's stable domain contract. Provider adapters own provider-specific authentication, endpoints, payloads, response normalization and failure mapping. The SDK, Skill and MCP interface all converge on the same core rather than creating separate banking implementations.
@@ -122,11 +141,13 @@ NairaGate is not a replacement for NIBSS, a bank, regulatory compliance, KYC obl
 
 ## Provider status
 
-| Provider | Bank discovery | Account resolution | Status |
-| --- | --- | --- | --- |
-| Paystack | Yes | Yes | Implemented |
-| Flutterwave | Planned | Planned | Roadmap |
-| Other native providers | Planned | Planned | Roadmap |
+| Provider               | Bank discovery | Account resolution | Status      |
+| ---------------------- | -------------- | ------------------ | ----------- |
+| Paystack               | Yes            | Yes                | Implemented |
+| Flutterwave            | Yes            | Yes                | Implemented |
+| Other native providers | Planned        | Planned            | Roadmap     |
+
+The Flutterwave adapter is built against Flutterwave's publicly documented v3 REST API (`GET /v3/banks/NG`, `POST /v3/accounts/resolve`) and is covered by deterministic tests with no live financial calls. It has not yet been exercised against a live Flutterwave key — do so in your own sandbox before production use.
 
 A provider appearing on the roadmap does not mean it is currently supported. New integrations are only marked implemented after the adapter, error mapping, documentation and automated tests are complete.
 

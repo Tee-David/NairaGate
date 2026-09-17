@@ -19,7 +19,7 @@ Use NairaGate as the provider-neutral boundary for Nigerian bank discovery and a
 - Treat resolved account names and account numbers as privacy-sensitive financial data.
 - Add application-level authentication, authorization, rate limiting, abuse monitoring, and privacy-aware logging before exposing resolution over HTTP.
 - Do not describe NairaGate as a replacement for NIBSS, banks, KYC, regulatory compliance, or payment processors.
-- Do not claim roadmap providers are implemented. Paystack is the currently implemented provider; Flutterwave and other native providers are on the roadmap.
+- Do not claim roadmap providers are implemented. Paystack and Flutterwave are currently implemented; other native providers are on the roadmap.
 
 ## TypeScript integration
 
@@ -51,7 +51,7 @@ NairaGate includes a stdio MCP server exposed by the `nairagate-mcp` binary. It 
 - `list_banks` lists banks available through the configured provider.
 - `resolve_account` resolves an account holder name from a validated Nigerian account number and bank code.
 
-The MCP process reads `PAYSTACK_SECRET_KEY` from its server-side environment. Never put the provider credential into prompts or tool arguments. Treat MCP hosts as application boundaries: only configure the server in environments where the credential and returned financial data are appropriately protected.
+The MCP process reads the credential for its configured provider (`PAYSTACK_SECRET_KEY` by default, or `FLUTTERWAVE_SECRET_KEY` when `NAIRAGATE_PROVIDER=flutterwave`) from its server-side environment. Never put the provider credential into prompts or tool arguments. Treat MCP hosts as application boundaries: only configure the server in environments where the credential and returned financial data are appropriately protected.
 
 ## When generating an API route
 

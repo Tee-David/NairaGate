@@ -4,9 +4,15 @@ All notable changes to NairaGate are documented here. The project follows Semant
 
 ## [Unreleased]
 
+### Added
+
+- Flutterwave provider (`FlutterwaveProvider`) for Nigerian bank discovery and account resolution, behind the existing `BankProvider` contract
+- `NAIRAGATE_PROVIDER` environment variable to select the `nairagate-mcp` provider (`paystack` or `flutterwave`)
+- Deterministic tests for Flutterwave bank listing, account resolution, and error mapping
+
 ### Planned
 
-- Flutterwave and additional native provider adapters
+- Additional native provider adapters
 - Continued SDK, MCP and Agent Skill hardening
 
 ## [0.1.0] - 2026-09-16

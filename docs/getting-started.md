@@ -13,15 +13,27 @@ npm run check
 
 Once the package is published, installation will use the package name `nairagate`.
 
-## Configure Paystack
+## Configure a provider
 
-Store your Paystack secret key in the server environment. Do not prefix it with framework-specific variables that expose values to browser bundles.
+Store your provider secret key in the server environment. Do not prefix it with framework-specific variables that expose values to browser bundles.
 
 ```ts
 import { createNairaGate, PaystackProvider } from "nairagate";
 
 const provider = new PaystackProvider({
   secretKey: process.env.PAYSTACK_SECRET_KEY!,
+});
+
+export const nairaGate = createNairaGate({ provider });
+```
+
+To use Flutterwave instead, construct `FlutterwaveProvider` with `FLUTTERWAVE_SECRET_KEY`. Nothing else in your application changes, since both providers implement the same `BankProvider` contract:
+
+```ts
+import { createNairaGate, FlutterwaveProvider } from "nairagate";
+
+const provider = new FlutterwaveProvider({
+  secretKey: process.env.FLUTTERWAVE_SECRET_KEY!,
 });
 
 export const nairaGate = createNairaGate({ provider });

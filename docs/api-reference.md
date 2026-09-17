@@ -29,6 +29,21 @@ new PaystackProvider({
 
 `secretKey` is required and must remain server-side. `fetch` is optional and primarily useful for testing or controlled runtimes. `baseUrl` defaults to Paystack's API origin. `timeoutMs` defaults to 10 seconds.
 
+## `FlutterwaveProvider`
+
+```ts
+new FlutterwaveProvider({
+  secretKey,
+  fetch,
+  baseUrl,
+  timeoutMs,
+});
+```
+
+`secretKey` is required and must remain server-side. `fetch` is optional and primarily useful for testing or controlled runtimes. `baseUrl` defaults to Flutterwave's `v3` API origin. `timeoutMs` defaults to 10 seconds.
+
+Bank discovery calls `GET /banks/NG` and account resolution calls `POST /accounts/resolve` against Flutterwave's documented v3 contract. Flutterwave sometimes returns HTTP 200 with a failure envelope for an invalid account/bank combination; the adapter treats that the same as a 400/404/422 and maps it to `ACCOUNT_NOT_FOUND`.
+
 ## `ResolveAccountInput`
 
 ```ts

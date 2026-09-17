@@ -5,17 +5,44 @@ import { serveStdio } from "@modelcontextprotocol/server/stdio";
 import { z } from "zod";
 import { createNairaGate } from "./client.js";
 import { NairaGateError } from "./errors.js";
+import type { BankProvider } from "./types.js";
 import { PaystackProvider } from "./providers/paystack.js";
+import { FlutterwaveProvider } from "./providers/flutterwave.js";
 
-function createServer(): McpServer {
-  const secretKey = process.env.PAYSTACK_SECRET_KEY?.trim();
-  if (!secretKey) {
-    throw new Error("PAYSTACK_SECRET_KEY is required to start nairagate-mcp.");
+const SUPPORTED_PROVIDERS = ["paystack", "flutterwave"] as const;
+type SupportedProvider = (typeof SUPPORTED_PROVIDERS)[number];
+
+function resolveProvider(): BankProvider {
+  const requested = (process.env.NAIRAGATE_PROVIDER?.trim().toLowerCase() ||
+    "paystack") as SupportedProvider;
+
+  if (requested === "flutterwave") {
+    const secretKey = process.env.FLUTTERWAVE_SECRET_KEY?.trim();
+    if (!secretKey) {
+      throw new Error(
+        "FLUTTERWAVE_SECRET_KEY is required to start nairagate-mcp with NAIRAGATE_PROVIDER=flutterwave.",
+      );
+    }
+    return new FlutterwaveProvider({ secretKey });
   }
 
-  const nairaGate = createNairaGate({
-    provider: new PaystackProvider({ secretKey }),
-  });
+  if (requested === "paystack") {
+    const secretKey = process.env.PAYSTACK_SECRET_KEY?.trim();
+    if (!secretKey) {
+      throw new Error(
+        "PAYSTACK_SECRET_KEY is required to start nairagate-mcp.",
+      );
+    }
+    return new PaystackProvider({ secretKey });
+  }
+
+  throw new Error(
+    `Unsupported NAIRAGATE_PROVIDER "${requested}". Supported providers: ${SUPPORTED_PROVIDERS.join(", ")}.`,
+  );
+}
+
+function createServer(): McpServer {
+  const nairaGate = createNairaGate({ provider: resolveProvider() });
   const server = new McpServer({
     name: "nairagate",
     version: "0.1.0",

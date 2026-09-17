@@ -13,6 +13,8 @@ BankProvider contract
     |
     +---- PaystackProvider
     |
+    +---- FlutterwaveProvider
+    |
     +---- future providers
 ```
 
@@ -24,7 +26,7 @@ BankProvider contract
 
 Each provider owns authentication, URLs, query encoding, response parsing, provider-specific status handling, and conversion into NairaGate domain types and errors.
 
-The current Paystack provider accepts an injectable `fetch` implementation. This keeps unit tests deterministic and avoids live financial API calls during CI.
+Both the Paystack and Flutterwave providers accept an injectable `fetch` implementation. This keeps unit tests deterministic and avoids live financial API calls during CI.
 
 ## Domain model
 

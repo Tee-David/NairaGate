@@ -14,25 +14,27 @@ The first release line focuses on making the existing Paystack integration depen
 - Framework examples and contributor documentation
 - Reproducible package and release workflow
 
-## Next provider: Flutterwave
+## 0.2.x: Flutterwave
 
-Flutterwave and other native provider support is on the roadmap. A provider is not considered supported until its adapter, normalization behavior, error mapping, documentation and deterministic tests are complete.
+Flutterwave is implemented behind the existing `BankProvider` contract:
 
-The Flutterwave milestone is expected to include:
-
-- Native provider adapter behind the existing `BankProvider` contract
-- Bank discovery where supported by the provider API
-- Nigerian account-name resolution
-- Provider-specific authentication and response validation
+- Native provider adapter (`FlutterwaveProvider`) behind the existing `BankProvider` contract
+- Bank discovery via Flutterwave's `GET /v3/banks/NG`
+- Nigerian account-name resolution via `POST /v3/accounts/resolve`
+- Provider-specific authentication and response validation, including Flutterwave's HTTP-200-with-error-envelope behavior on invalid accounts
 - Error normalization into NairaGate domain errors
 - Tests for success, invalid input, authentication, rate limits, provider failures and malformed responses
 - Usage documentation and examples
 
+The adapter was built and tested against Flutterwave's publicly documented v3 REST contract, with no live provider key, the same way the Paystack adapter is tested. It has not yet been exercised against a live Flutterwave sandbox key; treat that as an outstanding verification step before depending on it in production.
+
 ## Multi-provider maturity
 
-After the provider model has been proven across more than one implementation, the project can focus on the areas that become valuable at that scale:
+With the provider model now proven across two implementations, next candidates are additional Nigerian payment providers with public bank-discovery and account-resolution APIs (for example Monnify, Paga, Interswitch/Quickteller, or Providus/9PSB-style BaaS providers), added one at a time as real developer demand and API documentation availability allow. Each addition follows the same bar as Paystack and Flutterwave:
 
-- Additional Nigerian provider adapters based on real developer demand
+- A native adapter behind the existing `BankProvider` contract, built from that provider's own public API documentation
+- Deterministic tests with an injected `fetch` boundary and no live API calls required
+- Documented, explicit assumptions where the provider's real-world response quirks could not be verified against a live key
 - Compatibility guidance for provider capabilities and differences
 - More framework and runtime examples
 - Stronger release automation and package verification
