@@ -15,7 +15,7 @@ Use NairaGate as a TypeScript SDK, an Agent Skill, or an MCP server for compatib
 
 **Created and maintained by Taiwo David Dayomola, Senior Software Engineer.**
 
-> **Status:** Pre-1.0 and under active development. Paystack and Flutterwave are implemented. Other native provider support is on the roadmap. See [ROADMAP.md](ROADMAP.md).
+> **Status:** Pre-1.0 and under active development. Paystack, Flutterwave, Korapay, Squad and Monnify are implemented. See [ROADMAP.md](ROADMAP.md) for what's next and what was deliberately left out.
 
 ## Install
 
@@ -44,16 +44,44 @@ const account = await nairaGate.accounts.resolve({
 });
 ```
 
-Swap in `FlutterwaveProvider` to use Flutterwave instead. The application-facing API is identical; only the provider you construct changes:
+Every other provider implements the same `BankProvider` contract, so the application-facing API is identical — only the provider you construct changes:
 
 ```ts
-import { createNairaGate, FlutterwaveProvider } from "nairagate";
+import {
+  createNairaGate,
+  FlutterwaveProvider,
+  KorapayProvider,
+  SquadProvider,
+  MonnifyProvider,
+} from "nairagate";
 
-const secretKey = process.env.FLUTTERWAVE_SECRET_KEY;
-if (!secretKey) throw new Error("FLUTTERWAVE_SECRET_KEY is required.");
+// Flutterwave
+createNairaGate({
+  provider: new FlutterwaveProvider({
+    secretKey: process.env.FLUTTERWAVE_SECRET_KEY!,
+  }),
+});
 
-const nairaGate = createNairaGate({
-  provider: new FlutterwaveProvider({ secretKey }),
+// Korapay
+createNairaGate({
+  provider: new KorapayProvider({
+    secretKey: process.env.KORAPAY_SECRET_KEY!,
+  }),
+});
+
+// Squad
+createNairaGate({
+  provider: new SquadProvider({
+    secretKey: process.env.SQUAD_SECRET_KEY!,
+  }),
+});
+
+// Monnify (API key + secret key, not a single secret key)
+createNairaGate({
+  provider: new MonnifyProvider({
+    apiKey: process.env.MONNIFY_API_KEY!,
+    secretKey: process.env.MONNIFY_SECRET_KEY!,
+  }),
 });
 ```
 
@@ -69,13 +97,16 @@ Set the provider credential in the environment of the process running the MCP se
 PAYSTACK_SECRET_KEY=your_secret_key npx -y nairagate nairagate-mcp
 ```
 
-Set `NAIRAGATE_PROVIDER=flutterwave` to start it with Flutterwave instead:
+Set `NAIRAGATE_PROVIDER` to start it with a different provider instead:
 
 ```bash
 NAIRAGATE_PROVIDER=flutterwave FLUTTERWAVE_SECRET_KEY=your_secret_key npx -y nairagate nairagate-mcp
+NAIRAGATE_PROVIDER=korapay KORAPAY_SECRET_KEY=your_secret_key npx -y nairagate nairagate-mcp
+NAIRAGATE_PROVIDER=squad SQUAD_SECRET_KEY=your_secret_key npx -y nairagate nairagate-mcp
+NAIRAGATE_PROVIDER=monnify MONNIFY_API_KEY=your_api_key MONNIFY_SECRET_KEY=your_secret_key npx -y nairagate nairagate-mcp
 ```
 
-When configuring an MCP client, use `npx` as the command, pass `-y`, `nairagate`, and `nairagate-mcp` as arguments, and provide the matching secret key through that client's secure environment configuration. Do not put the key in prompts or repository files.
+When configuring an MCP client, use `npx` as the command, pass `-y`, `nairagate`, and `nairagate-mcp` as arguments, and provide the matching credential(s) through that client's secure environment configuration. Do not put credentials in prompts or repository files.
 
 ### MCP tools
 
@@ -120,9 +151,9 @@ Application/Agent --+-- NairaGate Agent Skill
                          NairaGate Core
                               |
                       Provider Interface
-                       |             |
-                   Paystack     Flutterwave
-                  implemented   implemented
+                       |       |       |       |       |
+                   Paystack Flutterwave Korapay Squad Monnify
+                       all implemented, behind the same BankProvider contract
 ```
 
 Your application depends on NairaGate's stable domain contract. Provider adapters own provider-specific authentication, endpoints, payloads, response normalization and failure mapping. The SDK, Skill and MCP interface all converge on the same core rather than creating separate banking implementations.
@@ -141,13 +172,16 @@ NairaGate is not a replacement for NIBSS, a bank, regulatory compliance, KYC obl
 
 ## Provider status
 
-| Provider               | Bank discovery | Account resolution | Status      |
-| ---------------------- | -------------- | ------------------ | ----------- |
-| Paystack               | Yes            | Yes                | Implemented |
-| Flutterwave            | Yes            | Yes                | Implemented |
-| Other native providers | Planned        | Planned            | Roadmap     |
+| Provider               | Bank discovery | Account resolution | Credential shape              | Status      |
+| ---------------------- | -------------- | ------------------ | ----------------------------- | ----------- |
+| Paystack               | Yes            | Yes                | Secret key                    | Implemented |
+| Flutterwave            | Yes            | Yes                | Secret key                    | Implemented |
+| Korapay                | Yes            | Yes                | Secret key                    | Implemented |
+| Squad                  | Yes            | Yes                | Secret key                    | Implemented |
+| Monnify                | Yes            | Yes                | API key + secret key (OAuth2) | Implemented |
+| Other native providers | Planned        | Planned            | —                             | Roadmap     |
 
-The Flutterwave adapter is built against Flutterwave's publicly documented v3 REST API (`GET /v3/banks/NG`, `POST /v3/accounts/resolve`) and is covered by deterministic tests with no live financial calls. It has not yet been exercised against a live Flutterwave key — do so in your own sandbox before production use.
+Every implemented adapter is built against that provider's publicly documented REST API and is covered by deterministic tests with an injected `fetch` boundary — no live financial calls are made in the test suite. **None of the Flutterwave, Korapay, Squad, or Monnify adapters have been exercised against a live provider key yet** (this repository's development environment could not reach those providers' documentation or sandbox APIs directly). Paystack is the only adapter that predates this constraint and reflects a real integration. Run your own sandbox smoke test against each provider before depending on it in production — see the caveats in [ROADMAP.md](ROADMAP.md) for what is comparatively less certain per provider (for example, Monnify's and Squad's exact bank-discovery endpoint and field names).
 
 A provider appearing on the roadmap does not mean it is currently supported. New integrations are only marked implemented after the adapter, error mapping, documentation and automated tests are complete.
 

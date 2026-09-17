@@ -19,7 +19,8 @@ Use NairaGate as the provider-neutral boundary for Nigerian bank discovery and a
 - Treat resolved account names and account numbers as privacy-sensitive financial data.
 - Add application-level authentication, authorization, rate limiting, abuse monitoring, and privacy-aware logging before exposing resolution over HTTP.
 - Do not describe NairaGate as a replacement for NIBSS, banks, KYC, regulatory compliance, or payment processors.
-- Do not claim roadmap providers are implemented. Paystack and Flutterwave are currently implemented; other native providers are on the roadmap.
+- Do not claim roadmap providers are implemented. Paystack, Flutterwave, Korapay, Squad and Monnify are currently implemented; other native providers are on the roadmap.
+- Monnify authenticates differently from the other providers: it takes `apiKey` and `secretKey` (not a single `secretKey`) and exchanges them internally for a short-lived OAuth2 token. Do not conflate its constructor shape with the other providers'.
 
 ## TypeScript integration
 
@@ -51,7 +52,7 @@ NairaGate includes a stdio MCP server exposed by the `nairagate-mcp` binary. It 
 - `list_banks` lists banks available through the configured provider.
 - `resolve_account` resolves an account holder name from a validated Nigerian account number and bank code.
 
-The MCP process reads the credential for its configured provider (`PAYSTACK_SECRET_KEY` by default, or `FLUTTERWAVE_SECRET_KEY` when `NAIRAGATE_PROVIDER=flutterwave`) from its server-side environment. Never put the provider credential into prompts or tool arguments. Treat MCP hosts as application boundaries: only configure the server in environments where the credential and returned financial data are appropriately protected.
+The MCP process reads the credential(s) for its configured provider from its server-side environment, selected via `NAIRAGATE_PROVIDER` (`paystack` by default, or `flutterwave`, `korapay`, `squad`, `monnify`): `PAYSTACK_SECRET_KEY`, `FLUTTERWAVE_SECRET_KEY`, `KORAPAY_SECRET_KEY`, `SQUAD_SECRET_KEY`, or `MONNIFY_API_KEY` + `MONNIFY_SECRET_KEY` respectively. Never put provider credentials into prompts or tool arguments. Treat MCP hosts as application boundaries: only configure the server in environments where the credential and returned financial data are appropriately protected.
 
 ## When generating an API route
 

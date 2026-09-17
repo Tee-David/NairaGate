@@ -6,6 +6,12 @@ export { PaystackProvider } from "./providers/paystack.js";
 export type { PaystackProviderOptions } from "./providers/paystack.js";
 export { FlutterwaveProvider } from "./providers/flutterwave.js";
 export type { FlutterwaveProviderOptions } from "./providers/flutterwave.js";
+export { KorapayProvider } from "./providers/korapay.js";
+export type { KorapayProviderOptions } from "./providers/korapay.js";
+export { SquadProvider } from "./providers/squad.js";
+export type { SquadProviderOptions } from "./providers/squad.js";
+export { MonnifyProvider } from "./providers/monnify.js";
+export type { MonnifyProviderOptions } from "./providers/monnify.js";
 export type {
   Bank,
   BankProvider,

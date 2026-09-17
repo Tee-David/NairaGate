@@ -7,12 +7,16 @@ All notable changes to NairaGate are documented here. The project follows Semant
 ### Added
 
 - Flutterwave provider (`FlutterwaveProvider`) for Nigerian bank discovery and account resolution, behind the existing `BankProvider` contract
-- `NAIRAGATE_PROVIDER` environment variable to select the `nairagate-mcp` provider (`paystack` or `flutterwave`)
-- Deterministic tests for Flutterwave bank listing, account resolution, and error mapping
+- Korapay provider (`KorapayProvider`) for Nigerian bank discovery and account resolution
+- Squad provider (`SquadProvider`) for Nigerian bank discovery and account resolution
+- Monnify provider (`MonnifyProvider`), the first adapter authenticating via OAuth2 (API key + secret key exchanged for a cached, auto-refreshing bearer token) rather than a static secret key
+- `NAIRAGATE_PROVIDER` environment variable to select the `nairagate-mcp` provider (`paystack`, `flutterwave`, `korapay`, `squad`, or `monnify`)
+- Deterministic tests for all four new providers' bank listing, account resolution, error mapping, and (for Monnify) token caching and expiry
 
 ### Planned
 
-- Additional native provider adapters
+- Additional native provider adapters, pending a verifiable public API contract for each
+- Live sandbox verification of the Flutterwave, Korapay, Squad and Monnify adapters against real provider keys
 - Continued SDK, MCP and Agent Skill hardening
 
 ## [0.1.0] - 2026-09-16

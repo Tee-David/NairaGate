@@ -15,6 +15,12 @@ BankProvider contract
     |
     +---- FlutterwaveProvider
     |
+    +---- KorapayProvider
+    |
+    +---- SquadProvider
+    |
+    +---- MonnifyProvider
+    |
     +---- future providers
 ```
 
@@ -26,7 +32,9 @@ BankProvider contract
 
 Each provider owns authentication, URLs, query encoding, response parsing, provider-specific status handling, and conversion into NairaGate domain types and errors.
 
-Both the Paystack and Flutterwave providers accept an injectable `fetch` implementation. This keeps unit tests deterministic and avoids live financial API calls during CI.
+Every provider accepts an injectable `fetch` implementation. This keeps unit tests deterministic and avoids live financial API calls during CI.
+
+Providers are not required to share an authentication shape. Paystack, Flutterwave, Korapay and Squad each take a single static secret key attached to every request. Monnify instead takes an `apiKey` and a `secretKey`, exchanges them for a short-lived OAuth2 bearer token, and caches that token internally until it is close to expiry — the token exchange and caching are entirely private to `MonnifyProvider`; the `BankProvider` contract and the rest of the application see no difference between it and the static-key providers.
 
 ## Domain model
 
